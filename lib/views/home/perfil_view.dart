@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import '../../models/user_model.dart';
 import '../../services/token_storage.dart';
 import '../../services/user_service.dart';
@@ -7,6 +7,7 @@ import '../auth/login_view.dart';
 import 'admin_panel_view.dart';
 import 'edit_profile_dialog.dart';
 import 'my_orders_view.dart';
+import 'wallet_qr_view.dart';
 
 class PerfilView extends StatefulWidget {
   final UserModel user;
@@ -211,6 +212,17 @@ class _PerfilViewState extends State<PerfilView> {
             },
           ),
           _ProfileOption(
+            icon: Icons.qr_code_2_rounded,
+            label: 'QR de Billetera',
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => WalletQrView(user: _user),
+                ),
+              );
+            },
+          ),
+          _ProfileOption(
             icon: Icons.location_on_outlined,
             label: 'Puntos de entrega',
             onTap: () {
@@ -279,3 +291,4 @@ class _ProfileOption extends StatelessWidget {
     );
   }
 }
+

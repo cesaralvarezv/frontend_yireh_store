@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Plan de Desarrollo y Tareas Pendientes — Yireh Store</title>
+  <style>
+    @page {
+      size: A4;
+      margin: 15mm 13mm;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      color: #1E293B;
+      background-color: #FFFFFF;
+      line-height: 1.45;
+      font-size: 10pt;
+      margin: 0;
+      padding: 0;
+    }
+
+    .cover-page {
+      min-height: 94vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      page-break-after: always;
+      padding: 35px 25px 20px 25px;
+      border: 2.5px solid #0F172A;
+      border-radius: 8px;
+      background: linear-gradient(180deg, #F8FAFC 0%, #FFFFFF 100%);
+    }
+
+    .cover-header {
+      text-align: center;
+    }
+
+    .cover-badge {
+      display: inline-block;
+      background-color: #0F172A;
+      color: #FFFFFF;
+      font-size: 9.5pt;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      padding: 6px 18px;
+      border-radius: 20px;
+      margin-bottom: 20px;
+    }
+
+    .cover-title {
+      font-size: 26pt;
+      font-weight: 800;
+      color: #0F172A;
+      line-height: 1.2;
+      margin: 0 0 10px 0;
+    }
+
+    .cover-subtitle {
+      font-size: 13.5pt;
+      color: #475569;
+      font-weight: 600;
+      margin: 0 0 20px 0;
+    }
+
+    .cover-divider {
+      width: 100px;
+      height: 4px;
+      background-color: #D97706;
+      margin: 0 auto 28px auto;
+      border-radius: 2px;
+    }
+
+    .cover-box {
+      background-color: #FFFFFF;
+      border: 1px solid #CBD5E1;
+      border-radius: 10px;
+      padding: 20px 26px;
+      margin: 0 auto;
+      max-width: 600px;
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+    }
+
+    .cover-box h4 {
+      margin: 0 0 12px 0;
+      color: #0F172A;
+      font-size: 10.5pt;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .cover-box ul {
+      margin: 0;
+      padding-left: 20px;
+      color: #334155;
+      font-size: 9.8pt;
+    }
+
+    .cover-box li {
+      margin-bottom: 7px;
+    }
+
+    .cover-footer {
+      margin-top: 30px;
+      padding-top: 15px;
+      border-top: 1px solid #E2E8F0;
+      display: flex;
+      justify-content: space-between;
+      font-size: 9pt;
+      color: #64748B;
+    }
+
+    .page-break {
+      page-break-before: always;
+    }
+
+    .no-break {
+      page-break-inside: avoid;
+    }
+
+    h1, h2, h3, h4 {
+      color: #0F172A;
+      font-weight: 700;
+      margin-top: 0;
+    }
+
+    h1 {
+      font-size: 16pt;
+      border-bottom: 2.5px solid #0F172A;
+      padding-bottom: 6px;
+      margin-bottom: 14px;
+    }
+
+    h2 {
+      font-size: 12pt;
+      color: #0F172A;
+      margin-top: 18px;
+      margin-bottom: 8px;
+      border-left: 4px solid #D97706;
+      padding-left: 8px;
+    }
+
+    h3 {
+      font-size: 10.5pt;
+      margin-top: 12px;
+      margin-bottom: 6px;
+      color: #1E293B;
+    }
+
+    p {
+      margin-top: 0;
+      margin-bottom: 10px;
+      text-align: justify;
+      color: #334155;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 10px 0 16px 0;
+      font-size: 9pt;
+      background-color: #FFFFFF;
+    }
+
+    th, td {
+      border: 1px solid #CBD5E1;
+      padding: 7px 9px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      background-color: #0F172A;
+      color: #FFFFFF;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    tr:nth-child(even) td {
+      background-color: #F8FAFC;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-size: 7.8pt;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .badge-urgent { background-color: #FEE2E2; color: #991B1B; border: 1px solid #F87171; }
+    .badge-high { background-color: #FEF3C7; color: #92400E; border: 1px solid #FCD34D; }
+    .badge-medium { background-color: #E0E7FF; color: #3730A3; border: 1px solid #A5B4FC; }
+    .badge-tech { background-color: #F1F5F9; color: #0F172A; border: 1px solid #CBD5E1; }
+
+    .callout {
+      border-left: 4px solid #0F172A;
+      background-color: #F8FAFC;
+      padding: 10px 14px;
+      border-radius: 0 6px 6px 0;
+      margin: 12px 0;
+      font-size: 9.5pt;
+    }
+
+    .callout-warning {
+      border-left-color: #D97706;
+      background-color: #FFFBEB;
+    }
+
+    .callout-info {
+      border-left-color: #2563EB;
+      background-color: #EFF6FF;
+    }
+
+    .arch-diagram {
+      background-color: #0F172A;
+      color: #F8FAFC;
+      border-radius: 6px;
+      padding: 12px;
+      margin: 12px 0;
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 8.2pt;
+      line-height: 1.35;
+      white-space: pre;
+      overflow-x: auto;
+    }
+
+    .module-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin: 12px 0;
+    }
+
+    .module-card {
+      border: 1px solid #E2E8F0;
+      border-radius: 6px;
+      padding: 10px 12px;
+      background-color: #FFFFFF;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+    }
+
+    .module-card h4 {
+      margin: 0 0 4px 0;
+      font-size: 9.8pt;
+      color: #0F172A;
+    }
+
+    .module-card p {
+      margin: 0;
+      font-size: 8.8pt;
+      color: #475569;
+      text-align: left;
+    }
+
+    .code-pill {
+      font-family: Consolas, monospace;
+      background-color: #F1F5F9;
+      color: #0F172A;
+      padding: 1px 4px;
+      border-radius: 3px;
+      font-size: 8.5pt;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- PORTADA -->
+  <div class="cover-page">
+    <div class="cover-header">
+      <span class="cover-badge">Roadmap de Desarrollo & Arquitectura</span>
+      <h1 class="cover-title">PLAN DETALLADO DE CONSTRUCCIÓN FASE 2</h1>
+      <div class="cover-subtitle">Yireh Store — Portal Web Angular, POS, BI, Supabase & Despliegue Cloud</div>
+      <div class="cover-divider"></div>
+      <p style="text-align: center; max-width: 580px; margin: 0 auto 20px auto; color: #475569; font-size: 10.5pt;">
+        Especificación técnica exhaustiva de requerimientos pendientes, arquitectura web administrativa en <strong>Angular</strong>, módulo de <strong>Cajero/POS</strong>, analítica de ventas, <strong>migración a Supabase</strong>, microservicios de correo y <strong>dockerización integral</strong>.
+      </p>
+    </div>
+
+    <div class="cover-box">
+      <h4>Alcance de los Requerimientos a Construir:</h4>
+      <ul>
+        <li><strong>Frontend Web Administrativo (Angular):</strong> Panel web corporativo para gestión centralizada, monitoreo comercial y administración financiera.</li>
+        <li><strong>Módulo de Punto de Venta (POS / Cajero):</strong> Sistema de cobro ágil en mostrador con soporte de efectivo, tarjeta y débito de billetera institucional.</li>
+        <li><strong>Inteligencia de Negocio & Finanzas:</strong> Historial de ventas por día/mes, arqueo y cierre diario de caja, y proyecciones de demanda.</li>
+        <li><strong>Inventario de Activos Físicos:</strong> Control de máquinas, cafeteras, refrigeradores, depreciación y mantenimiento preventivo.</li>
+        <li><strong>Encuestas de Satisfacción (CSAT / NPS):</strong> Calificación post-pedido en app móvil y métricas de servicio.</li>
+        <li><strong>Servicio de Email Transaccional:</strong> Envío de facturas digitales en PDF y extractos mensuales de compras por cliente vía SMTP/API.</li>
+        <li><strong>Migración a Supabase:</strong> Transición de MySQL local a PostgreSQL gestionado en la nube con Row Level Security.</li>
+        <li><strong>Dockerización & Servidor Web:</strong> Contenedores Docker multi-stage para Frontend, Backend y despliegue en VPS Cloud con HTTPS.</li>
+      </ul>
+    </div>
+
+    <div class="cover-footer">
+      <div><strong>Documento:</strong> Especificación de Requerimientos y Plan de Acción</div>
+      <div><strong>Proyecto:</strong> Yireh Store</div>
+      <div><strong>Versión:</strong> 2.0 (Planificación)</div>
+      <div><strong>Fecha:</strong> Septiembre 2026</div>
+    </div>
+  </div>
+
+  <!-- SECCIÓN 1: FRONTEND WEB EN ANGULAR & MÓDULOS -->
+  <div>
+    <h1>1. Vistas Administrativas en Angular (Web Dashboard)</h1>
+    <p>
+      Actualmente, la administración se gestiona parcialmente desde la app móvil en Flutter. Para optimizar las operaciones de gerencia, contabilidad y atención en caja, se especifica la construcción de un <strong>Frontend Web dedicado en Angular</strong> (v17/v18 Standalone Components) con diseño corporativo tipo dashboard, soporte para teclado numérico de caja y visualización gráfica avanzada.
+    </p>
+
+    <h2>Arquitectura Propuesta para Angular</h2>
+    <div class="arch-diagram">
+angular-admin-yireh/
+├── src/
+│   ├── app/
+│   │   ├── core/                    # Guards (Auth, Role), Interceptors (JWT), Servicios Base
+│   │   ├── layout/                  # Sidebar, Topbar, Notificaciones, Footer
+│   │   ├── modules/
+│   │   │   ├── pos/                 # Punto de Venta (Cajero) con escaneo y cobro rápido
+│   │   │   ├── analytics/           # Ventas diarias, mensuales, KPIs y proyecciones
+│   │   │   ├── cash-closure/        # Arqueo de caja, diferencias y cierre de turno
+│   │   │   ├── assets/              # Inventario de maquinaria, mobiliario y mantenimientos
+│   │   │   ├── satisfaction/        # Reportes de encuestas y opiniones de clientes
+│   │   │   ├── products-catalog/    # CRUD extendido de categorías y productos
+│   │   │   └── email-center/        # Reenvío de facturas y auditoría de envíos
+│   │   └── shared/                  # Tablas dinámicas, exportador Excel/PDF, modales</div>
+
+    <h2>Módulos Clave del Dashboard Angular</h2>
+    <div class="module-grid">
+      <div class="module-card">
+        <h4>🖥️ Punto de Venta (POS / Cajero)</h4>
+        <p>Interfaz optimizada para pantallas táctiles y teclado. Búsqueda instantánea de productos, botón de cobro rápido con efectivo, tarjeta o escaneo del código QR del estudiante para débito de saldo en billetera.</p>
+      </div>
+      <div class="module-card">
+        <h4>📊 Ventas & Proyecciones</h4>
+        <p>Gráficas interactivas (Chart.js / ngx-charts) con comparativas de ventas diarias y mensuales, productos más rentables, horarios de mayor afluencia y modelos de proyección predictiva.</p>
+      </div>
+      <div class="module-card">
+        <h4>💰 Arqueo & Cierre de Caja</h4>
+        <p>Registro de base inicial en efectivo, conteo de billetes/monedas, contraste contra ventas registradas por sistema y generación del acta formal de cierre diario.</p>
+      </div>
+      <div class="module-card">
+        <h4>⚙️ Inventario de Activos Físicos</h4>
+        <p>Fichas técnicas de equipos (cafeteras industriales, molinos, congeladores, terminales), registro de valor de compra, depreciación acumulada y fechas de mantenimiento.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECCIÓN 2: PUNTO DE VENTA Y CIERRE DE CAJA -->
+  <div class="page-break">
+    <h1>2. Módulos de Operación Financiera (Cajero & Cierres)</h1>
+
+    <h2>2.1. Módulo de Cajero / Punto de Venta (POS)</h2>
+    <p>
+      El objetivo de este módulo es atender a los clientes que realizan compras directamente en el mostrador de la cafetería sin usar la aplicación móvil, manteniendo el inventario y las finanzas completamente sincronizados con las órdenes móviles.
+    </p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Requerimiento</th>
+          <th>Detalle Funcional</th>
+          <th>Criterio de Aceptación</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Búsqueda & Selección</strong></td>
+          <td>Selección rápida por grid de fotos, categorías o lector de código de barras.</td>
+          <td>La adición al ticket de venta debe tomar menos de 1 segundo.</td>
+        </tr>
+        <tr>
+          <td><strong>Multi-Método de Pago</strong></td>
+          <td>Pago combinado: Efectivo + Saldo Billetera Estudiante + Tarjeta/Datafono.</td>
+          <td>El sistema calcula automáticamente el cambio o saldo faltante.</td>
+        </tr>
+        <tr>
+          <td><strong>Débito QR Institucional</strong></td>
+          <td>El cajero escanea el código de usuario del estudiante para debitar de su saldo.</td>
+          <td>Requiere validación de PIN o confirmación rápida en pantalla.</td>
+        </tr>
+        <tr>
+          <td><strong>Impresión / Envío de Ticket</strong></td>
+          <td>Generación de factura POS en ticketera térmica (80mm) o envío al email del cliente.</td>
+          <td>Se emite documento electrónico con consecutivo fiscal.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>2.2. Historial de Ventas, Cierre de Caja y Proyecciones</h2>
+    <p>
+      Actualmente el sistema registra pedidos individuales pero carece de consolidación contable y proyecciones. Se requiere implementar en el Backend y exponer en Angular:
+    </p>
+
+    <ul>
+      <li><strong>Cierre Diario de Caja (Z-Report):</strong>
+        <ul>
+          <li>Apertura de turno con monto base.</li>
+          <li>Separación estricta de ingresos: <em>Efectivo en gaveta</em> vs <em>Saldo virtual debitado</em> vs <em>Datáfono</em>.</li>
+          <li>Cálculo de descuadre: <span class="code-pill">Diferencia = Monto Físico Declarado - Monto Sistema</span>.</li>
+          <li>Bloqueo de modificaciones sobre pedidos cerrados tras el cierre del turno.</li>
+        </ul>
+      </li>
+      <li><strong>Ventas por Día y Mes:</strong> Consolidado con filtros de fecha, categorización de costos y margen de utilidad bruta.</li>
+      <li><strong>Proyecciones de Demanda:</strong> Modelo estadístico basado en series temporales (promedios ponderados por día de semana y eventos institucionales) para sugerir compras de materias primas a los proveedores.</li>
+    </ul>
+
+    <h2>2.3. Control e Inventario de Activos Físicos</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Campo / Dato</th>
+          <th>Descripción</th>
+          <th>Impacto Contable</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="code-pill">asset_code</span></td>
+          <td>Placa única de inventario físico (código de barras/código QR metálico).</td>
+          <td>Identificación y auditoría física.</td>
+        </tr>
+        <tr>
+          <td><span class="code-pill">name / category</span></td>
+          <td>Ej: Cafetera Espresso 2 Grupos, Molino On-Demand, Congelador Vertical.</td>
+          <td>Agrupación de activos fijos.</td>
+        </tr>
+        <tr>
+          <td><span class="code-pill">purchase_price / date</span></td>
+          <td>Costo original de adquisición y fecha de inicio de uso.</td>
+          <td>Base contable para amortización.</td>
+        </tr>
+        <tr>
+          <td><span class="code-pill">maintenance_schedule</span></td>
+          <td>Calendario de mantenimientos preventivos (cambio de empaques, descalcificación).</td>
+          <td>Prevención de paradas operativas en cocina.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- SECCIÓN 3: SERVICIOS DE EMAIL Y ENCUESTAS -->
+  <div class="page-break">
+    <h1>3. Experiencia de Usuario & Servicios de Correo</h1>
+
+    <h2>3.1. Servicio de Email Transaccional (Spring Mail / SendGrid)</h2>
+    <p>
+      El sistema actual no cuenta con notificaciones salientes. Se debe construir un micro-servicio desacoplado de correo en el backend Spring Boot utilizando <span class="code-pill">JavaMailSender</span> o una API externa (como SendGrid/Resend) con plantillas HTML responsivas para las siguientes acciones:
+    </p>
+
+    <div class="module-grid">
+      <div class="module-card">
+        <h4>📧 Facturas Digitales Automáticas</h4>
+        <p>Al confirmar una orden (en app o en POS), se genera automáticamente un PDF con la factura detallada y se remite al correo registrado del comprador.</p>
+      </div>
+      <div class="module-card">
+        <h4>📑 Historial & Extracto Mensual</h4>
+        <p>Función bajo demanda y programada (<span class="code-pill">@Scheduled</span>) para enviar a fin de mes un extracto de todos los consumos, recargas y saldo remanente al cliente o a sus acudientes.</p>
+      </div>
+      <div class="module-card">
+        <h4>💳 Comprobante de Recarga</h4>
+        <p>Confirmación inmediata de recargas exitosas indicando código de referencia bancario, monto acreditado y saldo actualizado de la billetera.</p>
+      </div>
+      <div class="module-card">
+        <h4>🔔 Alerta de Cierre Diario a Gerencia</h4>
+        <p>Envío nocturno del resumen consolidado del cierre de caja al administrador con las ventas totales y discrepancias de dinero en caja.</p>
+      </div>
+    </div>
+
+    <h2>3.2. Módulo de Encuestas de Satisfacción al Cliente (CSAT / NPS)</h2>
+    <p>
+      Para medir la calidad del producto y del servicio en la cafetería, se diseñará un flujo interactivo en la aplicación móvil y en el portal web:
+    </p>
+
+    <ul>
+      <li><strong>Disparador (Trigger):</strong> Se activa automáticamente cuando el pedido cambia al estado <span class="code-pill">DELIVERED</span> (Entregado).</li>
+      <li><strong>Métricas Recopiladas:</strong>
+        <ul>
+          <li>Calificación por estrellas (1 a 5 estrellas).</li>
+          <li>Tags rápidos: <em>"Temperatura perfecta"</em>, <em>"Rápida entrega"</em>, <em>"Buen sabor"</em>, <em>"Atención amable"</em> o <em>"Demorado"</em>.</li>
+          <li>Campo opcional de sugerencia de texto libre.</li>
+        </ul>
+      </li>
+      <li><strong>Dashboard de Métricas en Angular:</strong> Visualización del índice de satisfacción global, quejas recurrentes y ranking de productos mejor valorados.</li>
+    </ul>
+
+    <h2>Nuevos Endpoints a Desarrollar en el Backend</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Endpoint</th>
+          <th>Método</th>
+          <th>Propósito</th>
+          <th>Rol</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="code-pill">/api/pos/checkout</span></td>
+          <td><span class="badge badge-urgent">POST</span></td>
+          <td>Registro de venta física directa en caja mostrador</td>
+          <td><span class="badge badge-tech">CASHIER / ADMIN</span></td>
+        </tr>
+        <tr>
+          <td><span class="code-pill">/api/cash-closures/open</span></td>
+          <td><span class="badge badge-high">POST</span></td>
+          <td>Apertura de turno con monto base en efectivo</td>
+          <td><span class="badge badge-tech">CASHIER / ADMIN</span></td>
+        </tr>
+        <tr>
+          <td><span class="code-pill">/api/cash-closures/close</span></td>
+          <td><span class="badge badge-high">POST</span></td>
+          <td>Cierre formal de caja diario con arqueo de dinero</td>
+          <td><span class="badge badge-tech">CASHIER / ADMIN</span></td>
+        </tr>
+        <tr>
+          <td><span class="code-pill">/api/reports/sales</span></td>
+          <td><span class="badge badge-medium">GET</span></td>
+          <td>Ventas agregadas por rango de fechas (día/mes)</td>
+          <td><span class="badge badge-tech">ADMIN</span></td>
+        </tr>
+        <tr>
+          <td><span class="code-pill">/api/reports/projections</span></td>
+          <td><span class="badge badge-medium">GET</span></td>
+          <td>Cálculo predictivo de demanda para la siguiente semana</td>
+          <td><span class="badge badge-tech">ADMIN</span></td>
+        </tr>
+        <tr>
+          <td><span class="code-pill">/api/assets</span></td>
+          <td><span class="badge badge-medium">GET / POST</span></td>
+          <td>CRUD y control de inventario de activos de cocina</td>
+          <td><span class="badge badge-tech">ADMIN</span></td>
+        </tr>
+        <tr>
+          <td><span class="code-pill">/api/satisfaction/surveys</span></td>
+          <td><span class="badge badge-urgent">POST</span></td>
+          <td>Envío de calificación y comentarios de una orden</td>
+          <td><span class="badge badge-tech">USER</span></td>
+        </tr>
+        <tr>
+          <td><span class="code-pill">/api/emails/send-invoice/{orderId}</span></td>
+          <td><span class="badge badge-high">POST</span></td>
+          <td>Disparo manual o reintento de envío de factura PDF</td>
+          <td><span class="badge badge-tech">ADMIN</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- SECCIÓN 4: MIGRACIÓN A SUPABASE & DOCKERIZACIÓN -->
+  <div class="page-break">
+    <h1>4. Infraestructura Cloud: Supabase, Docker & Despliegue</h1>
+
+    <h2>4.1. Migración de Base de Datos: MySQL ➔ Supabase (PostgreSQL)</h2>
+    <p>
+      Actualmente el backend utiliza MySQL local. Migrar hacia <strong>Supabase</strong> proporciona una base de datos PostgreSQL gestionada de alto rendimiento, respaldos automatizados, alta disponibilidad, extensiones avanzadas y capacidades en tiempo real (*Realtime WebSockets*) ideales para el tablero de cocina.
+    </p>
+
+    <div class="callout callout-info">
+      <strong>Plan de Migración Paso a Paso:</strong>
+      <br>1. <strong>Creación del Proyecto en Supabase:</strong> Creación de la instancia PostgreSQL y obtención del URI de conexión JDBC con SSL (<span class="code-pill">jdbc:postgresql://db.[ref].supabase.co:5432/postgres?sslmode=require</span>).
+      <br>2. <strong>Adaptación de Dependencias Maven:</strong> Reemplazar <span class="code-pill">mysql-connector-j</span> por <span class="code-pill">org.postgresql:postgresql</span> en el <span class="code-pill">pom.xml</span> del backend.
+      <br>3. <strong>Ajuste de Dialecto JPA:</strong> Configurar <span class="code-pill">spring.jpa.properties.hibernate.dialect = org.hibernate.dialect.PostgreSQLDialect</span> en <span class="code-pill">application.properties</span>.
+      <br>4. <strong>Conversión de Tipos DDL:</strong> Mapear tipos MySQL (<span class="code-pill">INT AUTO_INCREMENT</span> ➔ <span class="code-pill">BIGSERIAL</span>, <span class="code-pill">DATETIME</span> ➔ <span class="code-pill">TIMESTAMPTZ</span>, <span class="code-pill">TINYINT(1)</span> ➔ <span class="code-pill">BOOLEAN</span>).
+      <br>5. <strong>Migración de Datos Existentes:</strong> Ejecución de script de exportación MySQL y carga en Supabase preservando relaciones e integridad referencial.
+    </div>
+
+    <h2>4.2. Estrategia de Dockerización Multi-Contenedor</h2>
+    <p>
+      Para garantizar portabilidad y despliegue continuo sin discrepancias de entorno, se crearán contenedores multi-stage optimizados:
+    </p>
+
+    <div class="arch-diagram">
++---------------------------------------------------------------------------------------+
+|                                ARQUITECTURA DE CONTENEDORES                           |
++---------------------------------------------------------------------------------------+
+|                                                                                       |
+|   INTERNET / CLIENTES                                                                 |
+|         │                                                                             |
+|         ▼  (HTTPS 443 / SSL Let's Encrypt)                                           |
+|   +───────────────────────────────────────────────────────────────────────────────+   |
+|   │                       NGINX REVERSE PROXY & GATEWAY                           │   |
+|   +───────────────────────────────────────┬───────────────────────────────────────+   |
+|                   │                       │                       │                   |
+|                   ▼ (/api/*)              ▼ (/)                   ▼ (/admin/*)        |
+|          +─────────────────+     +─────────────────+     +─────────────────+          |
+|          │ BACKEND SERVICE │     │  FLUTTER WEB    │     │  ANGULAR ADMIN  │          |
+|          │  Spring Boot    │     │  (Cliente)      │     │  (Dashboard)    │          |
+|          │  JRE 17 Slim    │     │  Nginx Alpine   │     │  Nginx Alpine   │          |
+|          +────────┬────────+     +─────────────────+     +─────────────────+          |
+|                   │                                                                   |
+|                   ▼ (Conexión Segura SSL)                                             |
+|          +─────────────────────────────────────────+                                  |
+|          │      SUPABASE CLOUD (PostgreSQL)        │                                  |
+|          +─────────────────────────────────────────+                                  |
++---------------------------------------------------------------------------------------+</div>
+
+    <h2>4.3. Especificación de Dockerfiles y Docker Compose</h2>
+    <ul>
+      <li><strong>Backend Dockerfile (Spring Boot):</strong> Multi-stage con etapa de compilación en <span class="code-pill">maven:3.9-eclipse-temurin-17</span> y etapa de ejecución ligera en <span class="code-pill">eclipse-temurin:17-jre-alpine</span> (reducción de tamaño de ~700MB a ~140MB).</li>
+      <li><strong>Angular Dockerfile:</strong> Compilación con <span class="code-pill">node:20-alpine</span> y servido final mediante <span class="code-pill">nginx:alpine</span> con compresión Gzip activada.</li>
+      <li><strong>Flutter Web Dockerfile:</strong> Servido de los activos compilados de Flutter Web en Nginx para acceso en navegadores.</li>
+      <li><strong>Docker Compose (<span class="code-pill">docker-compose.yml</span>):</strong> Orquestación unificada con reinicio automático (<span class="code-pill">restart: always</span>), redes internas aisladas y montaje de variables de entorno (<span class="code-pill">.env</span>).</li>
+    </ul>
+
+    <h2>4.4. Despliegue en Servidor Web Cloud (VPS)</h2>
+    <ul>
+      <li><strong>Proveedor Recomendado:</strong> Servidor VPS Linux (Ubuntu 22.04 / 24.04 LTS) en DigitalOcean, AWS EC2, Hetzner o Render.</li>
+      <li><strong>Seguridad & Certificados:</strong> Configuración de <strong>Certbot / Let's Encrypt</strong> para emisión y renovación automática de certificados SSL/TLS con candado verde seguro.</li>
+      <li><strong>Dominio y DNS:</strong> Configuración de registros tipo A y CNAME (<span class="code-pill">yirehstore.com</span> para la tienda y <span class="code-pill">admin.yirehstore.com</span> para la administración en Angular).</li>
+    </ul>
+  </div>
+
+  <!-- SECCIÓN 5: CRONOGRAMA Y PLAN DE ACCIÓN -->
+  <div class="page-break">
+    <h1>5. Plan de Ejecución y Cronograma de Trabajo</h1>
+    <p>
+      Para asegurar una entrega ordenada y sin interrupciones en la operación actual, se establece un plan de trabajo dividido en <strong>5 Fases estructuradas</strong>:
+    </p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Fase</th>
+          <th>Hito / Entregable</th>
+          <th>Tareas Principales</th>
+          <th>Prioridad</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Fase 1</strong></td>
+          <td><strong>Infraestructura & Supabase</strong></td>
+          <td>
+            • Aprovisionar proyecto en Supabase.<br>
+            • Migrar schema y scripts SQL a PostgreSQL.<br>
+            • Actualizar driver en Spring Boot y validar conexión.
+          </td>
+          <td><span class="badge badge-urgent">Crítica</span></td>
+        </tr>
+        <tr>
+          <td><strong>Fase 2</strong></td>
+          <td><strong>Servicios Core de Backend</strong></td>
+          <td>
+            • Crear endpoints para POS y apertura/cierre de caja.<br>
+            • Diseñar modelos de datos de Activos Físicos y Encuestas.<br>
+            • Implementar micro-servicio de Email y generación de PDF.
+          </td>
+          <td><span class="badge badge-urgent">Crítica</span></td>
+        </tr>
+        <tr>
+          <td><strong>Fase 3</strong></td>
+          <td><strong>Frontend Angular (Dashboard & POS)</strong></td>
+          <td>
+            • Inicializar proyecto Angular con componentes modulares.<br>
+            • Desarrollar interfaz táctil del Cajero / POS.<br>
+            • Construir gráficas de ventas, proyecciones y cierre de caja.<br>
+            • Crear vistas para inventario de activos y encuestas.
+          </td>
+          <td><span class="badge badge-high">Alta</span></td>
+        </tr>
+        <tr>
+          <td><strong>Fase 4</strong></td>
+          <td><strong>Integración en Flutter Móvil</strong></td>
+          <td>
+            • Incorporar formulario de calificación post-entrega.<br>
+            • Generación de código QR para débito de saldo en caja mostrador.<br>
+            • Botón de "Enviar extracto de compras a mi correo".
+          </td>
+          <td><span class="badge badge-medium">Media</span></td>
+        </tr>
+        <tr>
+          <td><strong>Fase 5</strong></td>
+          <td><strong>Dockerización & Despliegue Cloud</strong></td>
+          <td>
+            • Construir Dockerfiles multi-stage y <span class="code-pill">docker-compose.yml</span>.<br>
+            • Configurar VPS en la nube y Nginx Reverse Proxy.<br>
+            • Instalar certificados SSL gratuitos con Let's Encrypt.<br>
+            • Pruebas integrales de carga y paso a producción.
+          </td>
+          <td><span class="badge badge-high">Alta</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>Matriz de Responsabilidades y Roles Técnicos</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Rol</th>
+          <th>Responsabilidad Principal en la Fase 2</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Backend Engineer</strong></td>
+          <td>Adaptación a Supabase, endpoints POS, reportes de ventas, lógica de cierre de turno y templates de email.</td>
+        </tr>
+        <tr>
+          <td><strong>Frontend Web (Angular)</strong></td>
+          <td>Construcción de dashboard gerencial, punto de venta táctil, visualización de gráficas y gestión de activos.</td>
+        </tr>
+        <tr>
+          <td><strong>Frontend Mobile (Flutter)</strong></td>
+          <td>Módulo de encuestas CSAT, vista de código de barras/QR de billetera y reenvío de comprobantes por email.</td>
+        </tr>
+        <tr>
+          <td><strong>DevOps / Cloud</strong></td>
+          <td>Creación de imágenes Docker, orquestación, configuración de dominio DNS, Nginx y hardening del servidor VPS.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>Conclusión y Recomendación</h2>
+    <p>
+      La ejecución de este plan transformará a <strong>Yireh Store</strong> en una plataforma omnicanal integral de nivel empresarial. Al sumar el punto de venta en mostrador, el control riguroso de caja e inventario, la analítica predictiva y una infraestructura en la nube contenerizada con Supabase, el sistema garantizará alta fiabilidad, automatización contable y una experiencia de compra superior tanto física como digital.
+    </p>
+
+    <div style="margin-top: 40px; display: flex; justify-content: space-around; text-align: center;">
+      <div>
+        <div style="border-bottom: 1px solid #0F172A; width: 220px; margin-bottom: 6px;"></div>
+        <strong style="font-size: 9pt;">Aprobación Técnica</strong><br>
+        <span style="font-size: 8pt; color: #64748B;">Arquitectura de Software Yireh Store</span>
+      </div>
+      <div>
+        <div style="border-bottom: 1px solid #0F172A; width: 220px; margin-bottom: 6px;"></div>
+        <strong style="font-size: 9pt;">Aprobación de Proyecto</strong><br>
+        <span style="font-size: 8pt; color: #64748B;">Comité de Desarrollo & Operaciones</span>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

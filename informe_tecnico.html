@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Informe Técnico — Yireh Store (Backend & Frontend)</title>
+  <style>
+    @page {
+      size: A4;
+      margin: 16mm 14mm;
+    }
+    
+    * {
+      box-sizing: border-box;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      color: #2C1810;
+      background-color: #FFFFFF;
+      line-height: 1.5;
+      font-size: 11pt;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* Portada */
+    .cover-page {
+      min-height: 94vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      page-break-after: always;
+      padding: 40px 20px 20px 20px;
+      border: 2px solid #5C3D2E;
+      border-radius: 8px;
+      background: linear-gradient(180deg, #FAF7F4 0%, #FFFFFF 100%);
+    }
+
+    .cover-header {
+      text-align: center;
+    }
+
+    .cover-badge {
+      display: inline-block;
+      background-color: #5C3D2E;
+      color: #FFFFFF;
+      font-size: 10pt;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      padding: 6px 18px;
+      border-radius: 20px;
+      margin-bottom: 25px;
+    }
+
+    .cover-title {
+      font-size: 28pt;
+      font-weight: 800;
+      color: #3E2518;
+      line-height: 1.2;
+      margin: 0 0 12px 0;
+    }
+
+    .cover-subtitle {
+      font-size: 15pt;
+      color: #7D5A4A;
+      font-weight: 500;
+      margin: 0 0 25px 0;
+    }
+
+    .cover-divider {
+      width: 100px;
+      height: 4px;
+      background-color: #C8956C;
+      margin: 0 auto 35px auto;
+      border-radius: 2px;
+    }
+
+    .cover-features-box {
+      background-color: #FFFFFF;
+      border: 1px solid #E5DDD6;
+      border-radius: 10px;
+      padding: 24px 30px;
+      margin: 0 auto;
+      max-width: 580px;
+      box-shadow: 0 4px 12px rgba(92, 61, 46, 0.06);
+    }
+
+    .cover-features-box h4 {
+      margin: 0 0 14px 0;
+      color: #5C3D2E;
+      font-size: 11pt;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .cover-features-box ul {
+      margin: 0;
+      padding-left: 20px;
+      color: #55443D;
+      font-size: 10.5pt;
+    }
+
+    .cover-features-box li {
+      margin-bottom: 8px;
+    }
+
+    .cover-footer {
+      margin-top: 40px;
+      padding-top: 20px;
+      border-top: 1px solid #E5DDD6;
+      display: flex;
+      justify-content: space-between;
+      font-size: 9.5pt;
+      color: #7A6A62;
+    }
+
+    /* Estructura general de secciones */
+    .page-break {
+      page-break-before: always;
+    }
+
+    .no-break {
+      page-break-inside: avoid;
+    }
+
+    h1, h2, h3, h4 {
+      color: #3E2518;
+      font-weight: 700;
+      margin-top: 0;
+    }
+
+    h1 {
+      font-size: 18pt;
+      border-bottom: 2.5px solid #5C3D2E;
+      padding-bottom: 8px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    h2 {
+      font-size: 13.5pt;
+      color: #5C3D2E;
+      margin-top: 22px;
+      margin-bottom: 10px;
+      border-left: 4px solid #C8956C;
+      padding-left: 10px;
+    }
+
+    h3 {
+      font-size: 11.5pt;
+      margin-top: 14px;
+      margin-bottom: 8px;
+    }
+
+    p {
+      margin-top: 0;
+      margin-bottom: 12px;
+      text-align: justify;
+      color: #3B2A22;
+    }
+
+    /* Tablas */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 14px 0 20px 0;
+      font-size: 9.5pt;
+      background-color: #FFFFFF;
+    }
+
+    th, td {
+      border: 1px solid #DED6CF;
+      padding: 8px 10px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      background-color: #5C3D2E;
+      color: #FFFFFF;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    tr:nth-child(even) td {
+      background-color: #FAF7F5;
+    }
+
+    /* Badges */
+    .badge {
+      display: inline-block;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-size: 8pt;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .badge-get { background-color: #E8F5E9; color: #2E7D32; border: 1px solid #A5D6A7; }
+    .badge-post { background-color: #E3F2FD; color: #1565C0; border: 1px solid #90CAF9; }
+    .badge-put { background-color: #FFF8E1; color: #F57F17; border: 1px solid #FFE082; }
+    .badge-delete { background-color: #FFEBEE; color: #C62828; border: 1px solid #FFCDD2; }
+    .badge-role { background-color: #EDE7F6; color: #512DA8; border: 1px solid #D1C4E9; }
+
+    /* Callout Box */
+    .callout {
+      border-left: 4px solid #5C3D2E;
+      background-color: #F8F5F1;
+      padding: 12px 16px;
+      border-radius: 0 8px 8px 0;
+      margin: 14px 0;
+      font-size: 10pt;
+    }
+
+    .callout strong {
+      color: #3E2518;
+    }
+
+    .callout-success {
+      border-left-color: #4CAF50;
+      background-color: #F1F8F2;
+    }
+
+    /* Diagramas de arquitectura */
+    .arch-diagram {
+      background-color: #FAF8F5;
+      border: 1px solid #E2D9D2;
+      border-radius: 8px;
+      padding: 14px;
+      margin: 16px 0;
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 8.5pt;
+      line-height: 1.4;
+      white-space: pre;
+      overflow-x: auto;
+      color: #332219;
+    }
+
+    /* Grid de tarjetas para módulos */
+    .module-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin: 14px 0;
+    }
+
+    .module-card {
+      border: 1px solid #E5DDD6;
+      border-radius: 8px;
+      padding: 12px 14px;
+      background-color: #FFFFFF;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    }
+
+    .module-card h4 {
+      margin: 0 0 6px 0;
+      font-size: 10.5pt;
+      color: #5C3D2E;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .module-card p {
+      margin: 0;
+      font-size: 9.2pt;
+      color: #5A4841;
+      text-align: left;
+    }
+
+    .code-pill {
+      font-family: Consolas, monospace;
+      background-color: #F2ECE7;
+      color: #7D4830;
+      padding: 1px 5px;
+      border-radius: 4px;
+      font-size: 8.8pt;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- PORTADA -->
+  <div class="cover-page">
+    <div class="cover-header">
+      <span class="cover-badge">Documento Técnico Oficial</span>
+      <h1 class="cover-title">INFORME TÉCNICO DE CONSTRUCCIÓN Y ARQUITECTURA</h1>
+      <div class="cover-subtitle">Plataforma de Cafetería y Tienda Digital — Yireh Store</div>
+      <div class="cover-divider"></div>
+      <p style="text-align: center; max-width: 600px; margin: 0 auto 30px auto; color: #6D5B53; font-size: 11pt;">
+        Detalle exhaustivo de componentes, patrones de diseño, módulos funcionales, contratos REST y tecnologías implementadas en el <strong>Backend</strong> y <strong>Frontend</strong>.
+      </p>
+    </div>
+
+    <div class="cover-features-box">
+      <h4>Alcance de la Solución Construida:</h4>
+      <ul>
+        <li><strong>Backend:</strong> Microservicio RESTful en Spring Boot 4/3 con Java 17, Arquitectura Hexagonal, seguridad JWT y persistencia dual MySQL / H2.</li>
+        <li><strong>Frontend:</strong> Aplicación móvil nativa en Flutter 3.x, Arquitectura Hexagonal en cliente con enfoque reactivo <em>Local-First</em>.</li>
+        <li><strong>Módulos Clave:</strong> Autenticación por roles (USER/ADMIN), Catálogo interactivo, Carrito reactivo, Billetera digital con recargas, Despacho y cocina en tiempo real, y panel de administración integral.</li>
+        <li><strong>Calidad y Cobertura:</strong> Validación estática con 0 advertencias y tests de responsividad automatizados para todo tipo de pantallas.</li>
+      </ul>
+    </div>
+
+    <div class="cover-footer">
+      <div><strong>Proyecto:</strong> Yireh Store — Proyecto de Aula</div>
+      <div><strong>Estado:</strong> Construido & Operativo</div>
+      <div><strong>Fecha:</strong> Septiembre 2026</div>
+    </div>
+  </div>
+
+  <!-- SECCIÓN 1: RESUMEN Y ARQUITECTURA GENERAL -->
+  <div>
+    <h1>1. Visión General del Ecosistema Yireh Store</h1>
+    <p>
+      <strong>Yireh Store</strong> es una solución integral orientada a la digitalización del servicio de cafetería y tienda escolar/universitaria. El objetivo central del sistema es eliminar filas de espera, agilizar la toma de órdenes mediante una billetera virtual institucional y optimizar el proceso de preparación y despacho de alimentos en cocina a través de una pantalla de control de pedidos en tiempo real.
+    </p>
+
+    <div class="callout callout-success">
+      <strong>Principio Arquitectónico Unificador:</strong> Tanto el Backend como el Frontend fueron diseñados bajo la <strong>Arquitectura Hexagonal (Puertos y Adaptadores)</strong>. Esto desacopla las reglas de negocio de cualquier dependencia tecnológica externa (frameworks, base de datos o interfaces gráficas), permitiendo mantenibilidad, escalabilidad y testabilidad independiente.
+    </div>
+
+    <h2>Topología de Comunicación</h2>
+    <div class="arch-diagram">
++---------------------------------------------------------------------------------------+
+|                                    ECOSISTEMA FULL-STACK                              |
++---------------------------------------------------------------------------------------+
+|                                                                                       |
+|   [ CLIENTE MÓVIL FLUTTER ]                  [ BACKEND SPRING BOOT ]                  |
+|   +-----------------------+                  +----------------------+                 |
+|   | Views & Widgets (UI)  |                  | Controllers REST     |                 |
+|   |         v             |                  | (Adapter In)         |                 |
+|   | Controllers (ChangeN) |                  |         v            |                 |
+|   |         v             |   HTTP REST/JSON | Domain Ports (In)    |   JPA / JDBC    |
+|   | Repository Ports(Out) | === (JWT Bearer) ==> | Services (App)   | ============> [ MySQL DB ]
+|   |         v             | <==============  |         v            |                 |
+|   | API Adapters (Out)    |                  | Repositories (Out)   |                 |
+|   +-----------------------+                  +----------------------+                 |
+|                                                                                       |
++---------------------------------------------------------------------------------------+</div>
+
+    <h2>Ficha Técnica de Tecnologías</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Capa</th>
+          <th>Tecnología / Framework</th>
+          <th>Versión</th>
+          <th>Función Principal</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Backend Core</strong></td>
+          <td>Java + Spring Boot Starter</td>
+          <td>Java 17 / Spring Boot 4.1</td>
+          <td>API RESTful, lógica de negocio y contenedor IoC</td>
+        </tr>
+        <tr>
+          <td><strong>Seguridad Backend</strong></td>
+          <td>Spring Security + JJWT</td>
+          <td>0.12.6</td>
+          <td>Autenticación stateless mediante tokens JWT y control de roles</td>
+        </tr>
+        <tr>
+          <td><strong>Persistencia Backend</strong></td>
+          <td>Spring Data JPA + Hibernate</td>
+          <td>-</td>
+          <td>Mapeo objeto-relacional y consultas a base de datos</td>
+        </tr>
+        <tr>
+          <td><strong>Base de Datos</strong></td>
+          <td>MySQL / H2 Database</td>
+          <td>Connector 9.x / H2</td>
+          <td>Almacenamiento relacional transaccional</td>
+        </tr>
+        <tr>
+          <td><strong>Frontend Core</strong></td>
+          <td>Flutter SDK + Dart</td>
+          <td>Flutter 3.x / Dart 3.13+</td>
+          <td>Aplicación móvil multiplataforma de alto rendimiento</td>
+        </tr>
+        <tr>
+          <td><strong>Estado Frontend</strong></td>
+          <td>ChangeNotifier + Local-First</td>
+          <td>Nativo</td>
+          <td>Gestión reactiva de estado sin bloqueos de red</td>
+        </tr>
+        <tr>
+          <td><strong>Almacenamiento Local</strong></td>
+          <td>shared_preferences</td>
+          <td>2.5.0</td>
+          <td>Persistencia de tokens JWT y sesión de usuario en dispositivo</td>
+        </tr>
+        <tr>
+          <td><strong>Hardware Móvil</strong></td>
+          <td>image_picker</td>
+          <td>1.1.2</td>
+          <td>Captura de fotos para catálogo vía cámara o galería</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- SECCIÓN 2: EL BACKEND -->
+  <div class="page-break">
+    <h1>2. Componente Backend (Spring Boot & Hexagonal)</h1>
+    <p>
+      El backend reside en el paquete <span class="code-pill">com.backend_yireh_store</span> y divide sus responsabilidades en capas estrictas que aseguran la independencia del dominio.
+    </p>
+
+    <h2>Capas Arquitectónicas del Backend</h2>
+    <ul>
+      <li><strong>Domain Model (<span class="code-pill">domain.model</span>):</strong> Entidades de negocio puras, sin anotaciones de persistencia: <span class="code-pill">User</span>, <span class="code-pill">Product</span>, <span class="code-pill">Category</span>, <span class="code-pill">Order</span>, <span class="code-pill">OrderItem</span>, <span class="code-pill">OrderStatus</span>, <span class="code-pill">Cart</span>, <span class="code-pill">CartItem</span>, <span class="code-pill">Recharge</span> y <span class="code-pill">RoleName</span>.</li>
+      <li><strong>Puertos de Entrada y Salida (<span class="code-pill">domain.port</span>):</strong>
+        <ul>
+          <li><em>Ports In:</em> Interfaces de casos de uso invocadas por los controladores REST.</li>
+          <li><em>Ports Out:</em> Interfaces requeridas para interactuar con la base de datos y pasarelas.</li>
+        </ul>
+      </li>
+      <li><strong>Servicios de Aplicación (<span class="code-pill">application.service</span>):</strong> Orquestación de casos de uso (<span class="code-pill">AuthService</span>, <span class="code-pill">ProductService</span>, <span class="code-pill">CategoryService</span>, <span class="code-pill">OrderService</span>, <span class="code-pill">CartService</span>, <span class="code-pill">WalletService</span>, <span class="code-pill">UserService</span>, <span class="code-pill">LogService</span>).</li>
+      <li><strong>Adaptadores Web (<span class="code-pill">infrastructure.adapter.in.web</span>):</strong> Controladores Spring MVC que procesan peticiones HTTP y mapean DTOs mediante <em>MapStruct</em>.</li>
+      <li><strong>Adaptadores de Persistencia (<span class="code-pill">infrastructure.adapter.out.persistence</span>):</strong> Entidades JPA, Repositorios Spring Data y mappers entre entidad JPA y modelo de dominio.</li>
+    </ul>
+
+    <h2>Matriz de Endpoints REST del Backend</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Módulo</th>
+          <th>Método</th>
+          <th>Ruta de Endpoint</th>
+          <th>Descripción</th>
+          <th>Acceso</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td rowspan="2"><strong>Autenticación</strong></td>
+          <td><span class="badge badge-post">POST</span></td>
+          <td><span class="code-pill">/api/auth/login</span></td>
+          <td>Valida credenciales y retorna token JWT con datos de usuario</td>
+          <td>Público</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-post">POST</span></td>
+          <td><span class="code-pill">/api/auth/register</span></td>
+          <td>Registra cliente nuevo con saldo inicial de $0.0</td>
+          <td>Público</td>
+        </tr>
+        <tr>
+          <td rowspan="3"><strong>Productos</strong></td>
+          <td><span class="badge badge-get">GET</span></td>
+          <td><span class="code-pill">/api/products</span></td>
+          <td>Lista catálogo de productos activos (con soporte de filtros)</td>
+          <td>Público / USER</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-post">POST</span></td>
+          <td><span class="code-pill">/api/products</span></td>
+          <td>Crea nuevo ítem en catálogo (nombre, precio, stock, imagen)</td>
+          <td><span class="badge badge-role">ADMIN</span></td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-put">PUT</span></td>
+          <td><span class="code-pill">/api/products/{id}</span></td>
+          <td>Actualiza datos, disponibilidad de inventario o imagen</td>
+          <td><span class="badge badge-role">ADMIN</span></td>
+        </tr>
+        <tr>
+          <td rowspan="3"><strong>Categorías</strong></td>
+          <td><span class="badge badge-get">GET</span></td>
+          <td><span class="code-pill">/api/categories/active</span></td>
+          <td>Lista categorías visibles para el menú y tienda móvil</td>
+          <td>Público / USER</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-post">POST</span></td>
+          <td><span class="code-pill">/api/categories</span></td>
+          <td>Crea categoría con asignación de icono y orden</td>
+          <td><span class="badge badge-role">ADMIN</span></td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-put">PUT</span></td>
+          <td><span class="code-pill">/api/categories/{id}</span></td>
+          <td>Modifica nombre, estado activo/inactivo y color</td>
+          <td><span class="badge badge-role">ADMIN</span></td>
+        </tr>
+        <tr>
+          <td rowspan="3"><strong>Carrito</strong></td>
+          <td><span class="badge badge-get">GET</span></td>
+          <td><span class="code-pill">/api/cart</span></td>
+          <td>Obtiene los ítems persistidos del carrito del usuario</td>
+          <td><span class="badge badge-role">USER</span></td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-post">POST</span></td>
+          <td><span class="code-pill">/api/cart/items</span></td>
+          <td>Agrega o incrementa cantidad de un producto</td>
+          <td><span class="badge badge-role">USER</span></td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-delete">DELETE</span></td>
+          <td><span class="code-pill">/api/cart</span></td>
+          <td>Vacía completamente el carrito tras checkout</td>
+          <td><span class="badge badge-role">USER</span></td>
+        </tr>
+        <tr>
+          <td rowspan="3"><strong>Pedidos</strong></td>
+          <td><span class="badge badge-post">POST</span></td>
+          <td><span class="code-pill">/api/orders</span></td>
+          <td>Genera pedido, descuenta saldo y notifica a cocina</td>
+          <td><span class="badge badge-role">USER</span></td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-get">GET</span></td>
+          <td><span class="code-pill">/api/orders/my-orders</span></td>
+          <td>Historial de compras y estados del cliente autenticado</td>
+          <td><span class="badge badge-role">USER</span></td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-put">PUT</span></td>
+          <td><span class="code-pill">/api/orders/{id}/status</span></td>
+          <td>Actualiza estado del pedido en la pantalla de despacho</td>
+          <td><span class="badge badge-role">ADMIN</span></td>
+        </tr>
+        <tr>
+          <td rowspan="2"><strong>Billetera</strong></td>
+          <td><span class="badge badge-get">GET</span></td>
+          <td><span class="code-pill">/api/wallet/balance</span></td>
+          <td>Consulta de saldo disponible en tiempo real</td>
+          <td><span class="badge badge-role">USER</span></td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-post">POST</span></td>
+          <td><span class="code-pill">/api/wallet/recharge</span></td>
+          <td>Acredita saldo a la billetera tras confirmación de recarga</td>
+          <td><span class="badge badge-role">USER</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- SECCIÓN 3: EL FRONTEND -->
+  <div class="page-break">
+    <h1>3. Componente Frontend (Flutter & Mobile UI)</h1>
+    <p>
+      El frontend fue desarrollado íntegramente en Flutter con soporte responsivo y una arquitectura desacoplada que permite una experiencia de usuario rápida, fluida y con navegación consistente.
+    </p>
+
+    <h2>Módulos Funcionales Construidos</h2>
+    <div class="module-grid">
+      <div class="module-card">
+        <h4>🔐 1. Autenticación & Sesión</h4>
+        <p>Login y registro reactivos con validaciones regex en vivo. Integra <span class="code-pill">TokenStorage</span> para persistir credenciales y <span class="code-pill">SplashView</span> para inicio automático de sesión.</p>
+      </div>
+      <div class="module-card">
+        <h4>🛍️ 2. Catálogo & Tienda</h4>
+        <p>Búsqueda en tiempo real, filtro por chips de categorías, tarjetas con precio formateado y badge de stock. Vista detallada con selector numérico de unidades.</p>
+      </div>
+      <div class="module-card">
+        <h4>🛒 3. Carrito Local-First</h4>
+        <p>La interfaz responde en 0ms agregando o eliminando ítems en memoria local, mientras sincroniza con el backend en segundo plano sin congelar la pantalla.</p>
+      </div>
+      <div class="module-card">
+        <h4>💳 4. Billetera & Recargas</h4>
+        <p>Monedero digital con visualización de balance, soporte de recargas (PSE, Nequi, Daviplata, Efectivo) y bitácora de transacciones aprobadas.</p>
+      </div>
+      <div class="module-card">
+        <h4>📦 5. Checkout Flexible</h4>
+        <p>Modal interactivo donde el usuario elige entre pagar con saldo virtual o efectivo en caja, asigna su ubicación/mesa y especifica notas a cocina.</p>
+      </div>
+      <div class="module-card">
+        <h4>⏱️ 6. Despacho en Vivo (Cocina)</h4>
+        <p>Tablero KDS administrativo con tarjetas de pedidos entrantes. Permite avanzar estados con un solo toque: <em>Pendiente ➔ En preparación ➔ Listo ➔ Entregado</em>.</p>
+      </div>
+      <div class="module-card">
+        <h4>🏷️ 7. Gestor de Categorías</h4>
+        <p>Panel CRUD completo para crear categorías con selector visual de iconos, orden de visualización y control de visibilidad en el menú.</p>
+      </div>
+      <div class="module-card">
+        <h4>👥 8. Gestor de Usuarios & Roles</h4>
+        <p>Directorio de usuarios registrados con buscador y formulario para dar de alta nuevo personal administrativo con roles diferenciados (<span class="code-pill">USER</span> / <span class="code-pill">ADMIN</span>).</p>
+      </div>
+    </div>
+
+    <h2>Estrategia de Estado Local-First en Carrito</h2>
+    <p>
+      A diferencia de las arquitecturas web tradicionales donde cada acción espera confirmación HTTP, el <span class="code-pill">CartController</span> actualiza la lista local en memoria inmediatamente (<span class="code-pill">notifyListeners()</span>) y luego envía la petición HTTP a la API. Si la red falla, el ítem se conserva localmente y se alerta amigablemente al usuario sin romper el flujo de compra.
+    </p>
+
+    <h2>Sistema de Diseño (Design System)</h2>
+    <p>
+      Diseñado para transmitir la calidez de una cafetería moderna gourmet:
+    </p>
+    <ul>
+      <li><strong>Color Primario (<span class="code-pill">#5C3D2E</span>):</strong> Tono café espresso tostado, aplicado en botones de acción y barras de navegación.</li>
+      <li><strong>Color de Acento (<span class="code-pill">#C8956C</span>):</strong> Dorado cálido que resalta ofertas, categorías activas y badges.</li>
+      <li><strong>Fondo (<span class="code-pill">#F8F5F1</span>):</strong> Tono crema suave que evita fatiga visual en uso prolongado.</li>
+      <li><strong>Componentes Reutilizables:</strong> <span class="code-pill">PrimaryButton</span>, <span class="code-pill">CustomTextField</span>, <span class="code-pill">ProductCard</span>, <span class="code-pill">CategoryChip</span>, <span class="code-pill">CustomBottomNavBar</span> y <span class="code-pill">AlertService</span> para mensajes flotantes.</li>
+    </ul>
+  </div>
+
+  <!-- SECCIÓN 4: CALIDAD, PRUEBAS Y CONCLUSIONES -->
+  <div class="page-break">
+    <h1>4. Calidad, Pruebas y Estado del Proyecto</h1>
+
+    <h2>Resultados de Pruebas Automatizadas</h2>
+    <div class="callout callout-success">
+      <strong>Estado de Compilación y Calidad:</strong>
+      <br>✓ <strong>flutter analyze:</strong> 0 advertencias y 0 errores encontrados (100% compliant con <span class="code-pill">flutter_lints</span>).
+      <br>✓ <strong>flutter test:</strong> Ejecución de suite de responsividad aprobada en dispositivos compactos (iPhone SE 320px), teléfonos estándar (360x740, 412x915) y tablets (768x1024) sin desbordamientos de pantalla (<em>overflow</em>).
+      <br>✓ <strong>Backend Build:</strong> Compilación limpia con Maven y validación de tipos con MapStruct.
+    </div>
+
+    <h2>Ciclo de Vida Completo de una Orden (End-to-End)</h2>
+    <div class="arch-diagram">
++---------------------------------------------------------------------------------------+
+|                              FLUJO TRANSACCIONAL DE PEDIDO                            |
++---------------------------------------------------------------------------------------+
+|                                                                                       |
+|   1. Catálogo        2. Carrito Local-First     3. Checkout Dialog     4. Cocina KDS  |
+|  [Selecciona]  ===>  [Suma instantánea]   ===>  [Debita Billetera] ===> [En Vivo]     |
+|   Producto           items sincronizados         o Efectivo             Admin Orders  |
+|                                                       |                      |        |
+|                                                       v                      v        |
+|                                                [API: /orders]         [Cambio Estado] |
+|                                                DB Status: PENDING     PREPARING/READY |
++---------------------------------------------------------------------------------------+</div>
+
+    <h2>Resumen de Logros Técnicos</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Objetivo Planteado</th>
+          <th>Resultado Implementado</th>
+          <th>Estado</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Arquitectura escalable</td>
+          <td>Arquitectura Hexagonal en Backend y Frontend con inversión de dependencias</td>
+          <td><span class="badge badge-get">Completado</span></td>
+        </tr>
+        <tr>
+          <td>Autenticación robusta</td>
+          <td>JWT con claims de roles y refresco de sesión local en SharedPreferences</td>
+          <td><span class="badge badge-get">Completado</span></td>
+        </tr>
+        <tr>
+          <td>Billetera electrónica</td>
+          <td>Consulta de saldo, recargas multi-método y debito automático en compra</td>
+          <td><span class="badge badge-get">Completado</span></td>
+        </tr>
+        <tr>
+          <td>Despacho sin papeles</td>
+          <td>Módulo administrativo en tiempo real para agilizar entregas en cafetería</td>
+          <td><span class="badge badge-get">Completado</span></td>
+        </tr>
+        <tr>
+          <td>Diseño y Usabilidad</td>
+          <td>Paleta de café personalizada, navegación fluida y sin overflows en móviles</td>
+          <td><span class="badge badge-get">Completado</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>Conclusiones</h2>
+    <p>
+      El sistema <strong>Yireh Store</strong> ha sido construido con éxito cumpliendo estándares de calidad de software profesional. La separación clara entre el backend en Spring Boot y el frontend en Flutter proporciona a la cafetería una herramienta lista para producción, capaz de soportar alta concurrencia de clientes simultáneos y garantizar una experiencia de usuario rápida y moderna.
+    </p>
+
+    <div style="margin-top: 50px; display: flex; justify-content: space-around; text-align: center;">
+      <div>
+        <div style="border-bottom: 1px solid #7D5A4A; width: 220px; margin-bottom: 6px;"></div>
+        <strong style="font-size: 9.5pt;">Equipo de Desarrollo</strong><br>
+        <span style="font-size: 8.5pt; color: #7A6A62;">Yireh Store — Proyecto de Aula</span>
+      </div>
+      <div>
+        <div style="border-bottom: 1px solid #7D5A4A; width: 220px; margin-bottom: 6px;"></div>
+        <strong style="font-size: 9.5pt;">Revisión Técnica</strong><br>
+        <span style="font-size: 8.5pt; color: #7A6A62;">Arquitectura & Calidad de Software</span>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>
