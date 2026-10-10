@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # ☕ Yireh Store — Frontend Móvil
 
 [![Flutter Version](https://img.shields.io/badge/Flutter-3.x-02569B?style=for-the-badge&logo=flutter&logoColor=white)](https://flutter.dev)
@@ -30,6 +31,34 @@ Aplicación móvil desarrollada en **Flutter** para **Yireh Store**, una platafo
 
 ---
 
+=======
+
+Aplicación móvil desarrollada en **Flutter** para **Yireh Store**, una plataforma de cafetería moderna y tienda digital escolar/universitaria. El frontend implementa una **Arquitectura Hexagonal (Puertos y Adaptadores)**, gestión de estado reactiva *local-first*, integración completa con backend REST (Spring Boot), billetera virtual, checkout multi-método, historial de compras y un completo panel de administración con cocina/despacho de pedidos en tiempo real.
+
+---
+
+## 📋 Tabla de Contenidos
+
+- [Características Principales](#-características-principales)
+- [Stack Tecnológico](#-stack-tecnológico)
+- [Arquitectura de Software](#-arquitectura-de-software)
+- [Estructura del Proyecto](#-estructura-del-proyecto)
+- [Módulos del Sistema](#-módulos-del-sistema)
+  - [1. Autenticación y Sesión](#1-autenticación-y-sesión)
+  - [2. Catálogo y Tienda](#2-catálogo-y-tienda)
+  - [3. Carrito de Compras y Checkout](#3-carrito-de-compras-y-checkout)
+  - [4. Billetera Virtual y Recargas](#4-billetera-virtual-y-recargas)
+  - [5. Seguimiento de Pedidos (Cliente)](#5-seguimiento-de-pedidos-cliente)
+  - [6. Perfil de Usuario](#6-perfil-de-usuario)
+  - [7. Panel de Administración (ADMIN)](#7-panel-de-administración-admin)
+- [Sistema de Diseño (Design System)](#-sistema-de-diseño-design-system)
+- [Servicios Transversales](#-servicios-transversales)
+- [Instalación y Configuración](#-instalación-y-configuración)
+- [Pruebas y Análisis](#-pruebas-y-análisis)
+
+---
+
+>>>>>>> 56eec6299d6c85f02b4ca28cbb4171a4e20e68ad
 ## ✨ Características Principales
 
 - 🔐 **Autenticación Segura**: Login, Registro, persistencia de token JWT en almacenamiento local (`SharedPreferences`) y sesión continua al abrir la app.
