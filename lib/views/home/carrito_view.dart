@@ -5,7 +5,12 @@ import 'checkout_dialog.dart';
 
 class CarritoView extends StatelessWidget {
   final CartController cartCtrl;
-  const CarritoView({super.key, required this.cartCtrl});
+  final String userEmail;
+  const CarritoView({
+    super.key,
+    required this.cartCtrl,
+    required this.userEmail,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -35,6 +40,34 @@ class CarritoView extends StatelessWidget {
                 ),
               ),
             ),
+            if (userEmail.isNotEmpty)
+              Container(
+                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                decoration: BoxDecoration(
+                  color: AppColors.primarySurface,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.storefront_rounded,
+                      size: 18,
+                      color: AppColors.primary,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Cobro en caja: muestra este correo al cajero → $userEmail',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: AppColors.primary,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             if (cartCtrl.errorMessage != null && items.isNotEmpty)
               Container(
                 margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),

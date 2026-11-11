@@ -23,19 +23,14 @@ class MockAuthService implements AuthService {
   @override
   Future<UserModel?> login({required String email, required String password}) async {
     await Future.delayed(const Duration(milliseconds: 800));
-    _currentUser = UserModel(name: 'Demo User', phone: '', email: email, token: 'mock-token');
+    _currentUser = UserModel(name: 'Demo User', phone: '', email: email, token: 'mock-token', customerId: 1, customerCode: 'CLI-000001');
     return _currentUser;
   }
 
   @override
-  Future<UserModel?> register({
-    required String name,
-    required String phone,
-    required String email,
-    required String password,
-  }) async {
+  Future<UserModel?> register({required String name, required String phone, required String email, required String password}) async {
     await Future.delayed(const Duration(milliseconds: 900));
-    _currentUser = UserModel(name: name, phone: phone, email: email, token: 'mock-token');
+    _currentUser = UserModel(name: name, phone: phone, email: email, token: 'mock-token', customerId: 1, customerCode: 'CLI-000001');
     return _currentUser;
   }
 }
@@ -51,7 +46,7 @@ class ApiAuthService implements AuthService {
               inner: http.Client(),
               onLog: (l, t, m, s) => logService.report(level: l, tag: t, message: m, stackTrace: s),
             ),
-        baseUrl = baseUrl ?? AppConstants.apiBaseUrl;
+      baseUrl = baseUrl ?? AppConstants.apiBaseUrl;
 
   @override
   Future<UserModel?> login({required String email, required String password}) async {
@@ -70,12 +65,7 @@ class ApiAuthService implements AuthService {
   }
 
   @override
-  Future<UserModel?> register({
-    required String name,
-    required String phone,
-    required String email,
-    required String password,
-  }) async {
+  Future<UserModel?> register({required String name, required String phone, required String email, required String password}) async {
     final uri = Uri.parse('$baseUrl/auth/register');
     final res = await _client.post(
       uri,
@@ -98,4 +88,5 @@ class ApiAuthService implements AuthService {
       return body.isEmpty ? 'Error desconocido' : body;
     }
   }
+
 }

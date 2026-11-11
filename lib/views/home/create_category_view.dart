@@ -23,6 +23,7 @@ class _CreateCategoryViewState extends State<CreateCategoryView> {
   final _nameCtrl = TextEditingController();
   final _descriptionCtrl = TextEditingController();
   final _iconCtrl = TextEditingController();
+  final _imageUrlCtrl = TextEditingController();
   final _orderCtrl = TextEditingController();
   String _selectedLocation = 'Piso 3';
 
@@ -40,6 +41,7 @@ class _CreateCategoryViewState extends State<CreateCategoryView> {
       _nameCtrl.text = cat.name;
       _descriptionCtrl.text = cat.description;
       _iconCtrl.text = cat.icon;
+      _imageUrlCtrl.text = cat.imageUrl;
       _selectedLocation = cat.location.isNotEmpty ? cat.location : 'Piso 3';
       _orderCtrl.text = cat.order.toString();
     }
@@ -56,6 +58,7 @@ class _CreateCategoryViewState extends State<CreateCategoryView> {
     _nameCtrl.dispose();
     _descriptionCtrl.dispose();
     _iconCtrl.dispose();
+    _imageUrlCtrl.dispose();
     _orderCtrl.dispose();
     super.dispose();
   }
@@ -67,6 +70,7 @@ class _CreateCategoryViewState extends State<CreateCategoryView> {
     final name = _nameCtrl.text.trim();
     final description = _descriptionCtrl.text.trim();
     final icon = _iconCtrl.text.trim();
+    final imageUrl = _imageUrlCtrl.text.trim();
     final order = int.tryParse(_orderCtrl.text.trim()) ?? 0;
 
     bool success;
@@ -76,6 +80,7 @@ class _CreateCategoryViewState extends State<CreateCategoryView> {
         name: name,
         description: description,
         icon: icon,
+        imageUrl: imageUrl,
         location: _selectedLocation,
         order: order,
       );
@@ -84,6 +89,7 @@ class _CreateCategoryViewState extends State<CreateCategoryView> {
         name: name,
         description: description,
         icon: icon,
+        imageUrl: imageUrl,
         location: _selectedLocation,
         order: order,
       );
@@ -165,6 +171,43 @@ class _CreateCategoryViewState extends State<CreateCategoryView> {
                   ),
                 ),
               ),
+              const SizedBox(height: 14),
+
+              // Imagen (URL)
+              _buildField(
+                label: 'Imagen (URL)',
+                child: TextFormField(
+                  controller: _imageUrlCtrl,
+                  keyboardType: TextInputType.url,
+                  textInputAction: TextInputAction.next,
+                  onChanged: (_) => setState(() {}),
+                  decoration: _inputDecoration('https://images.unsplash.com/...').copyWith(
+                    helperText: 'Usa una imagen libre de derechos (Unsplash o Pexels)',
+                    helperMaxLines: 2,
+                  ),
+                ),
+              ),
+              if (_imageUrlCtrl.text.trim().isNotEmpty) ...[
+                const SizedBox(height: 10),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Image.network(
+                    _imageUrlCtrl.text.trim(),
+                    height: 140,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, _, _) => Container(
+                      height: 80,
+                      alignment: Alignment.center,
+                      color: AppColors.fieldFill,
+                      child: const Text(
+                        'No se pudo cargar la vista previa',
+                        style: TextStyle(fontSize: 12, color: AppColors.textHint),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
               const SizedBox(height: 14),
 
               // Ubicación

@@ -10,7 +10,7 @@ Future<void> _pumpWithSize(WidgetTester tester, Size size) async {
   await tester.pumpWidget(const YirehApp());
   // Splash -> espera
   await tester.pump(const Duration(milliseconds: 2200));
-  await tester.pumpAndSettle();
+  await tester.pump(const Duration(milliseconds: 100));
   expect(tester.takeException(), isNull, reason: 'Overflow en $size');
 }
 

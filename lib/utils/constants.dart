@@ -6,5 +6,5 @@ class AppConstants {
 
   // Backend Spring Boot — IP de la máquina donde corre el backend
   // Cambia a localhost si pruebas en emulador web/windows, 10.0.2.2 para emulador Android
-  static const apiBaseUrl = 'http://192.168.20.34:8080/api';
+  static const apiBaseUrl = 'http://10.0.2.2:8080/api';
 }

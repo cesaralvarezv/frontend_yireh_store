@@ -3,12 +3,16 @@ import 'package:http/http.dart' as http;
 import '../models/survey_model.dart';
 import '../services/token_storage.dart';
 import '../utils/constants.dart';
+import '../services/http_log_interceptor.dart';
 
 /// Servicio para encuestas CSAT — POST y GET contra /api/satisfaction/surveys.
 class SurveyService {
+  final http.Client _client;
   final String baseUrl;
 
-  SurveyService({String? baseUrl}) : baseUrl = baseUrl ?? AppConstants.apiBaseUrl;
+  SurveyService({http.Client? client, String? baseUrl})
+      : _client = client ?? HttpLogInterceptor(inner: http.Client()),
+        baseUrl = baseUrl ?? AppConstants.apiBaseUrl;
 
   Future<Map<String, String>> _authHeaders() async {
     final token = await TokenStorage.getToken();
@@ -33,7 +37,7 @@ class SurveyService {
       if (comment != null && comment.isNotEmpty) 'comment': comment,
     });
 
-    final res = await http.post(
+    final res = await _client.post(
       Uri.parse('$baseUrl/satisfaction/surveys'),
       headers: headers,
       body: body,
@@ -48,7 +52,7 @@ class SurveyService {
   /// Consulta si ya existe encuesta para una orden.
   Future<SurveyModel?> getSurveyByOrder(int orderId) async {
     final headers = await _authHeaders();
-    final res = await http.get(
+    final res = await _client.get(
       Uri.parse('$baseUrl/satisfaction/surveys/order/$orderId'),
       headers: headers,
     );

@@ -43,6 +43,7 @@ class CategoryController extends ChangeNotifier {
     required String name,
     required String description,
     required String icon,
+    required String imageUrl,
     required String location,
     required int order,
   }) async {
@@ -55,6 +56,7 @@ class CategoryController extends ChangeNotifier {
         name: name,
         description: description,
         icon: icon,
+        imageUrl: imageUrl,
         location: location,
         order: order,
       );
@@ -75,6 +77,7 @@ class CategoryController extends ChangeNotifier {
     required String name,
     required String description,
     required String icon,
+    required String imageUrl,
     required String location,
     required int order,
   }) async {
@@ -88,6 +91,7 @@ class CategoryController extends ChangeNotifier {
         name: name,
         description: description,
         icon: icon,
+        imageUrl: imageUrl,
         location: location,
         order: order,
       );

@@ -1,8 +1,9 @@
 import 'dart:async';
 import 'package:http/http.dart' as http;
+import '../../controllers/loading_controller.dart';
 
-/// Interceptor HTTP que loguea errores de red automáticamente.
-/// ISP: interfaz pequeña, solo intercepta requests.
+/// Interceptor HTTP que loguea errores de red y controla el spinner global
+/// para métodos de escritura (POST, PUT, PATCH, DELETE).
 class HttpLogInterceptor extends http.BaseClient {
   final http.Client _inner;
   final void Function(String level, String tag, String message, String? stackTrace)? onLog;
@@ -11,6 +12,12 @@ class HttpLogInterceptor extends http.BaseClient {
 
   @override
   Future<http.StreamedResponse> send(http.BaseRequest request) async {
+    final shouldShow = request.method == 'POST' || request.method == 'PUT' || request.method == 'PATCH' || request.method == 'DELETE';
+
+    if (shouldShow) {
+      loadingController.show();
+    }
+
     final stopwatch = Stopwatch()..start();
     try {
       final response = await _inner.send(request);
@@ -34,6 +41,10 @@ class HttpLogInterceptor extends http.BaseClient {
         st.toString(),
       );
       rethrow;
+    } finally {
+      if (shouldShow) {
+        loadingController.hide();
+      }
     }
   }
 }

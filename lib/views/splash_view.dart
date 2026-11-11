@@ -1,12 +1,8 @@
 import 'package:flutter/material.dart';
-import '../controllers/auth_controller.dart';
-import '../repositories/auth_repository.dart';
-import '../services/auth_service.dart';
+import '../services/token_storage.dart';
 import '../theme/app_colors.dart';
 import '../utils/responsive.dart';
 import '../widgets/app_logo.dart';
-import '../views/home/home_view.dart';
-import '../views/home/admin_panel_view.dart';
 import 'auth/login_view.dart';
 
 /// Splash / Loading screen — intenta restaurar sesión, si no va a Login.
@@ -40,40 +36,27 @@ class _SplashViewState extends State<SplashView>
   }
 
   Future<void> _initSession() async {
-    bool restored = false;
-    AuthController? controller;
+    // Al abrir la app, siempre se asegura de que cualquier sesión previa persistida
+    // quede limpia, para iniciar en la pantalla de Login sin sesión cargada.
     try {
-      controller = AuthController(
-        repository: AuthRepositoryImpl(service: ApiAuthService()),
-      );
-      restored = await controller.restoreSession();
-    } catch (_) {
-      restored = false;
-    }
+      await TokenStorage.clear();
+    } catch (_) {}
 
     if (!mounted) return;
 
-    // Espera minimo 2s para que se vea el splash
+    // Espera mínimo 2s para que se vea el splash
     await Future.delayed(const Duration(milliseconds: 2200));
 
     if (!mounted) return;
 
-    if (restored && controller?.currentUser != null) {
-      final user = controller!.currentUser!;
-      final targetView = user.isAdmin ? AdminPanelView(user: user) : HomeView(user: user);
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => targetView),
-      );
-    } else {
-      Navigator.of(context).pushReplacement(
-        PageRouteBuilder(
-          transitionDuration: const Duration(milliseconds: 400),
-          pageBuilder: (_, a, _) => const LoginView(),
-          transitionsBuilder: (_, anim, _, child) =>
-              FadeTransition(opacity: anim, child: child),
-        ),
-      );
-    }
+    Navigator.of(context).pushReplacement(
+      PageRouteBuilder(
+        transitionDuration: const Duration(milliseconds: 400),
+        pageBuilder: (_, a, _) => const LoginView(),
+        transitionsBuilder: (_, anim, _, child) =>
+            FadeTransition(opacity: anim, child: child),
+      ),
+    );
   }
 
   @override

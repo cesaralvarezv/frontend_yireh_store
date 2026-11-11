@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import '../utils/constants.dart';
+import '../services/http_log_interceptor.dart';
 
 /// SRP: Solo captura y envía logs al backend.
 /// DIP: Independiente de controllers/views.
@@ -12,7 +13,7 @@ class LogService {
   bool _flushing = false;
 
   LogService({http.Client? client, String? baseUrl})
-      : _client = client ?? http.Client(),
+      : _client = client ?? HttpLogInterceptor(inner: http.Client()),
         baseUrl = baseUrl ?? AppConstants.apiBaseUrl;
 
   /// Inicializa la captura de errores de Flutter.

@@ -230,7 +230,7 @@ class _SurveyViewState extends State<SurveyView>
                   itemCount: 5,
                   itemSize: 52,
                   unratedColor: AppColors.accentLight,
-                  itemBuilder: (_, __) => const Icon(
+                  itemBuilder: (_, _) => const Icon(
                     Icons.star_rounded,
                     color: Color(0xFFFFB300),
                   ),

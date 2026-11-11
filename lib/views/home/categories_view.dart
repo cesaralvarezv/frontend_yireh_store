@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+
 import '../../controllers/category_controller.dart';
 import '../../models/category_model.dart';
 import '../../services/alert_service.dart';
 import '../../theme/app_colors.dart';
+import '../../utils/category_formatters.dart';
+import '../../widgets/app_back_button.dart';
+import '../../widgets/category_card.dart';
 import 'create_category_view.dart';
 import 'create_product_view.dart';
 
@@ -65,18 +69,22 @@ class _CategoriesViewState extends State<CategoriesView> {
   }
 
   Future<void> _toggleStatus(CategoryModel category) async {
+    final displayName = formatCategoryTitle(category.name);
     final confirmed = await _alerts.confirm(
       context: context,
       title: category.active ? 'Desactivar categoría' : 'Activar categoría',
       message: category.active
-          ? '¿Estás seguro de desactivar "${category.name}"? No se mostrará en la tienda.'
-          : '¿Estás seguro de activar "${category.name}"? Volverá a estar visible en la tienda.',
+          ? '¿Estás seguro de desactivar "$displayName"? No se mostrará en la tienda.'
+          : '¿Estás seguro de activar "$displayName"? Volverá a estar visible en la tienda.',
       confirmText: category.active ? 'Desactivar' : 'Activar',
       isDestructive: category.active,
     );
 
     if (confirmed == true && mounted) {
-      final success = await _categoryCtrl.toggleCategoryStatus(category.id, category.active);
+      final success = await _categoryCtrl.toggleCategoryStatus(
+        category.id,
+        category.active,
+      );
       if (mounted) {
         if (success) {
           _alerts.success(_categoryCtrl.successMessage ?? '', context: context);
@@ -89,7 +97,7 @@ class _CategoriesViewState extends State<CategoriesView> {
 
   Future<void> _deleteCategory(CategoryModel category) async {
     final confirmed = await _alerts.confirmDeleteCategory(
-      categoryName: category.name,
+      categoryName: formatCategoryTitle(category.name),
       context: context,
     );
 
@@ -108,330 +116,145 @@ class _CategoriesViewState extends State<CategoriesView> {
   @override
   Widget build(BuildContext context) {
     _alerts.init(context);
+
+    final categories = _categoryCtrl.categories;
+    final activeCount = categories.where((category) => category.active).length;
+    final subtitle = _categoryCtrl.isLoading && categories.isEmpty
+        ? 'Cargando catálogo...'
+        : categories.isEmpty
+            ? 'Organiza el catálogo de tu cafetería'
+            : '$activeCount activas · ${categories.length} en total';
+    final bottomInset = MediaQuery.paddingOf(context).bottom;
+
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
-        title: const Text('Categorías', style: TextStyle(fontWeight: FontWeight.w600)),
-        centerTitle: true,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded),
-          onPressed: () => Navigator.of(context).pop(),
-          tooltip: 'Volver al panel',
-        ),
+      appBar: _CategoriesAppBar(
+        subtitle: subtitle,
+        onBack: () => Navigator.of(context).pop(),
       ),
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.only(bottom: 16, right: 16),
-        child: FloatingActionButton.extended(
-          onPressed: _goToCreateCategory,
-          backgroundColor: AppColors.primary,
-          foregroundColor: Colors.white,
-          icon: const Icon(Icons.category_rounded, size: 20),
-          label: const Text('Nueva categoría', style: TextStyle(fontWeight: FontWeight.w600)),
-        ),
-      ),
+      floatingActionButton: categories.isEmpty
+          ? null
+          : Padding(
+              padding: const EdgeInsets.only(bottom: 12, right: 4),
+              child: FloatingActionButton(
+                onPressed: _goToCreateCategory,
+                tooltip: 'Nueva categoría',
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+                elevation: 2,
+                highlightElevation: 4,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: const Icon(Icons.add_rounded, size: 26),
+              ),
+            ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-      body: _buildBody(),
+      body: Padding(
+        padding: EdgeInsets.only(bottom: 96 + bottomInset),
+        child: _buildBody(),
+      ),
     );
   }
 
   Widget _buildBody() {
-    if (_categoryCtrl.isLoading && _categoryCtrl.categories.isEmpty) {
-      return const Center(child: CircularProgressIndicator(color: AppColors.primary));
+    final categories = _categoryCtrl.categories;
+
+    if (_categoryCtrl.isLoading && categories.isEmpty) {
+      return const _LoadingState();
     }
 
-    if (_categoryCtrl.errorMessage != null && _categoryCtrl.categories.isEmpty) {
+    if (_categoryCtrl.errorMessage != null && categories.isEmpty) {
       return _ErrorState(
-        icon: Icons.error_outline_rounded,
-        color: AppColors.error,
-        title: 'Error al cargar',
         message: _categoryCtrl.errorMessage!,
         onRetry: () => _categoryCtrl.loadCategories(),
       );
     }
 
-    if (_categoryCtrl.categories.isEmpty) {
+    if (categories.isEmpty) {
       return _EmptyState(onCreate: _goToCreateCategory);
     }
 
     return RefreshIndicator(
       onRefresh: () => _categoryCtrl.loadCategories(),
-      child: ListView.separated(
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
-        itemCount: _categoryCtrl.categories.length,
-        separatorBuilder: (_, _) => const SizedBox(height: 12),
-        itemBuilder: (ctx, i) => _CategoryCard(
-          category: _categoryCtrl.categories[i],
-          onEdit: _goToEditCategory,
-          onToggleStatus: _toggleStatus,
-          onDelete: _deleteCategory,
-          onCreateProduct: _goToCreateProduct,
-        ),
+      color: AppColors.primary,
+      child: ListView.builder(
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
+        physics: const AlwaysScrollableScrollPhysics(),
+        itemCount: categories.length,
+        itemBuilder: (context, index) {
+          final category = categories[index];
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: CategoryCard(
+              category: category,
+              onEdit: () => _goToEditCategory(category),
+              onToggleStatus: () => _toggleStatus(category),
+              onDelete: () => _deleteCategory(category),
+              onCreateProduct: () => _goToCreateProduct(category),
+            ),
+          );
+        },
       ),
     );
   }
 }
 
-/// ─────────────────────────────────────────────────
-/// CATEGORY CARD — Layout vertical responsive
-/// ─────────────────────────────────────────────────
-class _CategoryCard extends StatelessWidget {
-  final CategoryModel category;
-  final void Function(CategoryModel) onEdit;
-  final void Function(CategoryModel) onToggleStatus;
-  final void Function(CategoryModel) onDelete;
-  final void Function(CategoryModel) onCreateProduct;
+class _CategoriesAppBar extends StatelessWidget implements PreferredSizeWidget {
+  final String subtitle;
+  final VoidCallback onBack;
 
-  const _CategoryCard({
-    required this.category,
-    required this.onEdit,
-    required this.onToggleStatus,
-    required this.onDelete,
-    required this.onCreateProduct,
+  const _CategoriesAppBar({
+    required this.subtitle,
+    required this.onBack,
   });
 
   @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final isCompact = constraints.maxWidth < 360;
-        
-        return Container(
-          padding: EdgeInsets.all(isCompact ? 12 : 16),
-          decoration: BoxDecoration(
-            color: AppColors.surface,
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.primary.withValues(alpha: 0.04),
-                blurRadius: 10,
-                offset: const Offset(0, 2),
-              ),
-            ],
-            border: category.active ? null : Border.all(color: AppColors.fieldBorder, width: 1),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // ── Fila superior: Icono + Nombre + Estado ──────────────────
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Icono de categoría
-                  Container(
-                    width: 44,
-                    height: 44,
-                    decoration: BoxDecoration(
-                      color: category.active ? AppColors.primarySurface : AppColors.fieldFill,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Center(
-                      child: Text(
-                        category.icon.isNotEmpty ? category.icon : '📦',
-                        style: const TextStyle(fontSize: 20),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  // Nombre + Estado
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                category.name,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  fontSize: isCompact ? 14 : 15,
-                                  fontWeight: FontWeight.w600,
-                                  color: category.active ? AppColors.textPrimary : AppColors.textSecondary,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            // Badge de estado
-                            _StatusChip(active: category.active, compact: isCompact),
-                          ],
-                        ),
-                        if (category.description.isNotEmpty) ...[
-                          const SizedBox(height: 4),
-                          Text(
-                            category.description,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontSize: isCompact ? 11 : 12,
-                              color: AppColors.textSecondary,
-                              height: 1.3,
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-
-              // ── Información secundaria ─────────────────────────────────
-              if (!isCompact) ...[
-                const SizedBox(height: 10),
-                _InfoRow(
-                  order: category.order,
-                  createdAt: category.displayCreatedAt,
-                ),
-              ],
-
-              // ── Divisor antes de acciones ──────────────────────────────
-              const SizedBox(height: 12),
-              Divider(
-                color: AppColors.divider,
-                height: 1,
-                thickness: 1,
-              ),
-              const SizedBox(height: 10),
-
-              // ── Botones de acción — Wrap responsive ────────────────────
-              Wrap(
-                alignment: WrapAlignment.end,
-                spacing: 8,
-                runSpacing: 8,
-                crossAxisAlignment: WrapCrossAlignment.center,
-                children: [
-                  _ActionButton(
-                    icon: Icons.edit_outlined,
-                    label: isCompact ? null : 'Editar',
-                    color: AppColors.primary,
-                    onPressed: () => onEdit(category),
-                    tooltip: 'Editar categoría',
-                    isCompact: isCompact,
-                  ),
-                  _ActionButton(
-                    icon: Icons.add_circle_outline,
-                    label: isCompact ? null : 'Crear producto',
-                    color: AppColors.primary,
-                    onPressed: () => onCreateProduct(category),
-                    tooltip: 'Crear producto en esta categoría',
-                    isCompact: isCompact,
-                  ),
-                  _ActionButton(
-                    icon: category.active ? Icons.visibility_off_outlined : Icons.visibility_outlined,
-                    label: isCompact ? null : (category.active ? 'Ocultar' : 'Mostrar'),
-                    color: category.active ? AppColors.warning : AppColors.success,
-                    onPressed: () => onToggleStatus(category),
-                    tooltip: category.active ? 'Desactivar categoría' : 'Activar categoría',
-                    isCompact: isCompact,
-                  ),
-                  _ActionButton(
-                    icon: Icons.delete_outline,
-                    label: isCompact ? null : 'Eliminar',
-                    color: AppColors.error,
-                    onPressed: () => onDelete(category),
-                    tooltip: 'Eliminar categoría',
-                    isDestructive: true,
-                    isCompact: isCompact,
-                  ),
-                ],
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-}
-
-/// ─────────────────────────────────────────────────
-/// BADGE DE ESTADO — Compacto y responsive
-/// ─────────────────────────────────────────────────
-class _StatusChip extends StatelessWidget {
-  final bool active;
-  final bool compact;
-
-  const _StatusChip({required this.active, required this.compact});
+  Size get preferredSize => const Size.fromHeight(72);
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: compact ? 8 : 10,
-        vertical: compact ? 2 : 3,
-      ),
-      decoration: BoxDecoration(
-        color: active ? AppColors.successSurface : AppColors.fieldFill,
-        borderRadius: BorderRadius.circular(compact ? 20 : 12),
-        border: active ? null : Border.all(color: AppColors.fieldBorder, width: 1),
-      ),
-      child: Text(
-        active ? 'Activa' : 'Inactiva',
-        style: TextStyle(
-          fontSize: compact ? 9 : 10,
-          fontWeight: FontWeight.w700,
-          color: active ? AppColors.success : AppColors.textSecondary,
+    return AppBar(
+      toolbarHeight: 72,
+      backgroundColor: AppColors.surface,
+      surfaceTintColor: Colors.transparent,
+      elevation: 0,
+      scrolledUnderElevation: 0,
+      automaticallyImplyLeading: false,
+      titleSpacing: 4,
+      leadingWidth: 64,
+      leading: Padding(
+        padding: const EdgeInsets.only(left: 16),
+        child: Align(
+          alignment: Alignment.centerLeft,
+          child: AppBackButton(
+            onPressed: onBack,
+            tooltip: 'Volver al panel',
+          ),
         ),
       ),
-    );
-  }
-}
-
-/// ─────────────────────────────────────────────────
-/// FILA DE INFORMACIÓN SECUNDARIA
-/// ─────────────────────────────────────────────────
-class _InfoRow extends StatelessWidget {
-  final int order;
-  final String? createdAt;
-
-  const _InfoRow({required this.order, this.createdAt});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        _InfoChip(
-          icon: Icons.format_list_numbered_rounded,
-          text: 'Orden: $order',
-        ),
-        if (createdAt != null) ...[
-          const SizedBox(width: 10),
-          _InfoChip(
-            icon: Icons.schedule_rounded,
-            text: 'Creada: $createdAt',
-          ),
-        ],
-      ],
-    );
-  }
-}
-
-class _InfoChip extends StatelessWidget {
-  final IconData icon;
-  final String text;
-
-  const _InfoChip({required this.icon, required this.text});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: AppColors.primarySurface.withValues(alpha: 0.5),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
+      title: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 12, color: AppColors.textHint),
-          const SizedBox(width: 6),
-          Text(
-            text,
+          const Text(
+            'Categorías',
             style: TextStyle(
-              fontSize: 11,
-              color: AppColors.textHint,
+              fontSize: 22,
+              fontWeight: FontWeight.w700,
+              color: AppColors.textPrimary,
+              letterSpacing: -0.3,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            subtitle,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              fontSize: 12,
               fontWeight: FontWeight.w500,
+              color: AppColors.textSecondary,
             ),
           ),
         ],
@@ -440,72 +263,30 @@ class _InfoChip extends StatelessWidget {
   }
 }
 
-/// ─────────────────────────────────────────────────
-/// BOTÓN DE ACCIÓN — Con label opcional y tooltip
-/// ─────────────────────────────────────────────────
-class _ActionButton extends StatelessWidget {
-  final IconData icon;
-  final String? label;
-  final Color color;
-  final VoidCallback onPressed;
-  final String tooltip;
-  final bool isDestructive;
-  final bool isCompact;
-
-  const _ActionButton({
-    required this.icon,
-    this.label,
-    required this.color,
-    required this.onPressed,
-    required this.tooltip,
-    this.isDestructive = false,
-    required this.isCompact,
-  });
+class _LoadingState extends StatelessWidget {
+  const _LoadingState();
 
   @override
   Widget build(BuildContext context) {
-    final buttonStyle = OutlinedButton.styleFrom(
-      foregroundColor: color,
-      side: BorderSide(color: color, width: 1.5),
-      padding: EdgeInsets.symmetric(
-        horizontal: isCompact ? 10 : 14,
-        vertical: isCompact ? 8 : 10,
-      ),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-    );
-
-    return Tooltip(
-      message: tooltip,
-      child: label != null
-          ? OutlinedButton.icon(
-              onPressed: onPressed,
-              icon: Icon(icon, size: 18),
-              label: Text(
-                label!,
-                style: TextStyle(
-                  fontSize: isCompact ? 11 : 12,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              style: buttonStyle,
-            )
-          : OutlinedButton(
-              onPressed: onPressed,
-              style: buttonStyle.copyWith(
-                padding: WidgetStateProperty.all(
-                  EdgeInsets.all(isCompact ? 10 : 12),
-                ),
-              ),
-              child: Icon(icon, size: 20),
+    return const Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          CircularProgressIndicator(color: AppColors.primary),
+          SizedBox(height: 16),
+          Text(
+            'Cargando categorías...',
+            style: TextStyle(
+              fontSize: 13,
+              color: AppColors.textSecondary,
             ),
+          ),
+        ],
+      ),
     );
   }
 }
 
-/// ─────────────────────────────────────────────────
-/// ESTADO VACÍO
-/// ─────────────────────────────────────────────────
 class _EmptyState extends StatelessWidget {
   final VoidCallback onCreate;
 
@@ -514,54 +295,63 @@ class _EmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Padding(
+      child: SingleChildScrollView(
         padding: const EdgeInsets.all(32),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              width: 80,
-              height: 80,
+              width: 88,
+              height: 88,
               decoration: BoxDecoration(
                 color: AppColors.primarySurface,
-                shape: BoxShape.circle,
+                borderRadius: BorderRadius.circular(24),
               ),
               child: const Icon(
                 Icons.category_outlined,
-                size: 36,
+                size: 40,
                 color: AppColors.primary,
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 24),
             const Text(
-              'No hay categorías creadas',
+              'Aún no hay categorías',
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
                 color: AppColors.textPrimary,
               ),
             ),
             const SizedBox(height: 8),
             const Text(
-              'Todavía no has creado ninguna categoría para organizar los productos.',
+              'Crea tu primera categoría para organizar el catálogo de la cafetería.',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 13,
+                height: 1.45,
                 color: AppColors.textSecondary,
-                height: 1.4,
               ),
             ),
             const SizedBox(height: 24),
             FilledButton.icon(
               onPressed: onCreate,
               icon: const Icon(Icons.add_rounded, size: 18),
-              label: const Text('Crear primera categoría'),
+              label: const Text('Crear categoría'),
               style: FilledButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 14,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                textStyle: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
           ],
@@ -571,20 +361,11 @@ class _EmptyState extends StatelessWidget {
   }
 }
 
-/// ─────────────────────────────────────────────────
-/// ESTADO DE ERROR
-/// ─────────────────────────────────────────────────
 class _ErrorState extends StatelessWidget {
-  final IconData icon;
-  final Color color;
-  final String title;
   final String message;
   final VoidCallback onRetry;
 
   const _ErrorState({
-    required this.icon,
-    required this.color,
-    required this.title,
     required this.message,
     required this.onRetry,
   });
@@ -592,19 +373,31 @@ class _ErrorState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Padding(
+      child: SingleChildScrollView(
         padding: const EdgeInsets.all(32),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 48, color: color),
-            const SizedBox(height: 16),
-            Text(
-              title,
+            Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                color: AppColors.error.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(22),
+              ),
+              child: const Icon(
+                Icons.error_outline_rounded,
+                size: 38,
+                color: AppColors.error,
+              ),
+            ),
+            const SizedBox(height: 22),
+            const Text(
+              'No pudimos cargar las categorías',
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
+                fontSize: 17,
+                fontWeight: FontWeight.w700,
                 color: AppColors.textPrimary,
               ),
             ),
@@ -612,17 +405,31 @@ class _ErrorState extends StatelessWidget {
             Text(
               message,
               textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
+              style: const TextStyle(
+                fontSize: 13,
+                height: 1.45,
+                color: AppColors.textSecondary,
+              ),
             ),
-            const SizedBox(height: 20),
-            FilledButton.icon(
+            const SizedBox(height: 22),
+            FilledButton.tonalIcon(
               onPressed: onRetry,
               icon: const Icon(Icons.refresh_rounded, size: 18),
               label: const Text('Reintentar'),
               style: FilledButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                backgroundColor: AppColors.primarySurface,
+                foregroundColor: AppColors.primary,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 22,
+                  vertical: 13,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                textStyle: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
           ],

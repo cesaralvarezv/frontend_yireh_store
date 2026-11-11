@@ -1,9 +1,11 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import '../../infrastructure/adapter/out/api_product_repository.dart';
 import '../../models/product_model.dart';
 import '../../controllers/cart_controller.dart';
 import '../../theme/app_colors.dart';
+import '../../utils/category_formatters.dart';
+import '../../widgets/app_back_button.dart';
+import '../../widgets/product_list_item.dart';
 
 /// Vista de productos de una categoría — con regresar, imagen, nombre, precio, cantidad.
 class ProductDetailView extends StatefulWidget {
@@ -27,9 +29,6 @@ class _ProductDetailViewState extends State<ProductDetailView> {
   bool _isLoading = true;
   String? _error;
 
-  // Cantidad seleccionada por producto
-  final Map<String, int> _quantities = {};
-
   @override
   void initState() {
     super.initState();
@@ -44,56 +43,10 @@ class _ProductDetailViewState extends State<ProductDetailView> {
     try {
       final repo = ApiProductRepository();
       _products = await repo.getProductsByCategory(widget.categoryId);
-      // Inicializar cantidad en 1 para cada producto
-      for (final p in _products) {
-        _quantities[p.id] = 1;
-      }
     } catch (e) {
       _error = 'No fue posible cargar los productos';
     } finally {
       setState(() => _isLoading = false);
-    }
-  }
-
-  void _increment(String productId) {
-    setState(() {
-      _quantities[productId] = (_quantities[productId] ?? 1) + 1;
-    });
-  }
-
-  void _decrement(String productId) {
-    final current = _quantities[productId] ?? 1;
-    if (current > 1) {
-      setState(() {
-        _quantities[productId] = current - 1;
-      });
-    }
-  }
-
-  Future<void> _addToCart(ProductModel product) async {
-    final qty = _quantities[product.id] ?? 1;
-    try {
-      await widget.cartCtrl.addItem(product.id, product.name, product.price, quantity: qty);
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('$qty x ${product.name} agregado al carrito'),
-          backgroundColor: AppColors.success,
-          duration: const Duration(seconds: 1),
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        ),
-      );
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error al agregar: $e'),
-          backgroundColor: AppColors.error,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        ),
-      );
     }
   }
 
@@ -139,32 +92,22 @@ class _ProductDetailViewState extends State<ProductDetailView> {
       child: Row(
         children: [
           // Botón regresar
-          GestureDetector(
-            onTap: () => Navigator.of(context).pop(),
-            child: Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                color: AppColors.primary,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: const Icon(
-                Icons.arrow_back_rounded,
-                color: Colors.white,
-                size: 22,
-              ),
-            ),
+          AppBackButton(
+            onPressed: () => Navigator.of(context).pop(),
+            tooltip: 'Volver',
           ),
           const SizedBox(width: 12),
           // Nombre categoría
           Expanded(
             child: Text(
-              widget.categoryName.toUpperCase(),
+              formatCategoryTitle(widget.categoryName),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
               style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
                 color: AppColors.textPrimary,
-                letterSpacing: 0.5,
+                letterSpacing: 0.1,
               ),
             ),
           ),
@@ -230,230 +173,12 @@ class _ProductDetailViewState extends State<ProductDetailView> {
       itemCount: _products.length,
       itemBuilder: (ctx, i) {
         final product = _products[i];
-        final qty = _quantities[product.id] ?? 1;
-        return _ProductCard(
+        return ProductListItemTile(
           product: product,
-          quantity: qty,
-          onIncrement: () => _increment(product.id),
-          onDecrement: () => _decrement(product.id),
-          onAddToCart: () => _addToCart(product),
+          cartCtrl: widget.cartCtrl,
         );
       },
     );
   }
 }
 
-// ─────────────────────────────────────────────────
-//  CARD DE PRODUCTO — Imagen + Nombre + Categoría + Precio + Cantidad
-// ─────────────────────────────────────────────────
-
-class _ProductCard extends StatelessWidget {
-  final ProductModel product;
-  final int quantity;
-  final VoidCallback onIncrement;
-  final VoidCallback onDecrement;
-  final VoidCallback onAddToCart;
-
-  const _ProductCard({
-    required this.product,
-    required this.quantity,
-    required this.onIncrement,
-    required this.onDecrement,
-    required this.onAddToCart,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          // ── IMAGEN ──
-          ClipRRect(
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(20),
-              bottomLeft: Radius.circular(20),
-            ),
-            child: Container(
-              width: 120,
-              height: 140,
-              color: AppColors.primarySurface,
-              child: product.imageUrl.isNotEmpty
-                  ? _buildImage(product.imageUrl)
-                  : _buildPlaceholder(),
-            ),
-          ),
-
-          // ── DETALLES ──
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(14),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Nombre producto
-                  Text(
-                    product.name.toUpperCase(),
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.textPrimary,
-                      letterSpacing: 0.3,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  // Categoría
-                  Text(
-                    product.categoryName.toUpperCase(),
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.textSecondary.withValues(alpha: 0.7),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-
-                  // Fila: Cantidad + Botón agregar
-                  Row(
-                    children: [
-                      // Selector cantidad
-                      Container(
-                        decoration: BoxDecoration(
-                          color: AppColors.fieldFill,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            _QtyButton(icon: Icons.remove, onTap: onDecrement),
-                            Container(
-                              width: 40,
-                              alignment: Alignment.center,
-                              child: Text(
-                                '$quantity',
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                  color: AppColors.textPrimary,
-                                ),
-                              ),
-                            ),
-                            _QtyButton(icon: Icons.add, onTap: onIncrement),
-                          ],
-                        ),
-                      ),
-                      const Spacer(),
-                      // Botón agregar (círculo rojo)
-                      GestureDetector(
-                        onTap: onAddToCart,
-                        child: Container(
-                          width: 44,
-                          height: 44,
-                          decoration: const BoxDecoration(
-                            color: AppColors.error,
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(Icons.add_rounded, color: Colors.white, size: 26),
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 12),
-
-                  // Precio total
-                  Text(
-                    '\$${_formatPrice(product.price * quantity)}',
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.primary,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPlaceholder() {
-    return Center(
-      child: Icon(
-        Icons.fastfood_rounded,
-        size: 40,
-        color: AppColors.primary.withValues(alpha: 0.3),
-      ),
-    );
-  }
-
-  Widget _buildImage(String imageUrl) {
-    final isLocalFile = !imageUrl.startsWith('http://') && !imageUrl.startsWith('https://');
-    
-    if (isLocalFile) {
-      final file = File(imageUrl);
-      if (file.existsSync()) {
-        return Image.file(
-          file,
-          fit: BoxFit.cover,
-          width: double.infinity,
-          height: double.infinity,
-          errorBuilder: (_, _, _) => _buildPlaceholder(),
-        );
-      }
-      return _buildPlaceholder();
-    }
-    
-    return Image.network(
-      imageUrl,
-      fit: BoxFit.cover,
-      width: double.infinity,
-      height: double.infinity,
-      errorBuilder: (_, _, _) => _buildPlaceholder(),
-    );
-  }
-
-  String _formatPrice(double price) {
-    if (price % 1 == 0) {
-      return price.toStringAsFixed(0);
-    }
-    return price.toStringAsFixed(2);
-  }
-}
-
-// ─────────────────────────────────────────────────
-//  BOTÓN DE CANTIDAD (+/-)
-// ─────────────────────────────────────────────────
-
-class _QtyButton extends StatelessWidget {
-  final IconData icon;
-  final VoidCallback onTap;
-
-  const _QtyButton({required this.icon, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 36,
-        height: 36,
-        alignment: Alignment.center,
-        child: Icon(icon, size: 18, color: AppColors.textPrimary),
-      ),
-    );
-  }
-}

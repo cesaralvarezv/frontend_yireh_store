@@ -3,8 +3,10 @@ import '../../controllers/home_controller.dart';
 import '../../controllers/cart_controller.dart';
 import '../../infrastructure/adapter/out/api_product_repository.dart';
 import '../../infrastructure/adapter/out/api_cart_repository.dart';
+import '../../models/category_model.dart';
 import '../../models/user_model.dart';
 import '../../theme/app_colors.dart';
+import '../../utils/category_formatters.dart';
 import '../../utils/responsive.dart';
 import '../../widgets/category_chip.dart';
 import '../../widgets/custom_search_bar.dart';
@@ -65,7 +67,7 @@ class _HomeViewState extends State<HomeView> {
           index: _navIndex,
           children: [
             _TiendaTab(homeCtrl: _homeCtrl, cartCtrl: _cartCtrl, searchCtrl: _searchCtrl, user: widget.user),
-            CarritoView(cartCtrl: _cartCtrl),
+            CarritoView(cartCtrl: _cartCtrl, userEmail: widget.user.email),
             const RecargasView(),
             PerfilView(user: widget.user),
           ],
@@ -351,7 +353,7 @@ class _LocationSection extends StatelessWidget {
 // ─────────────────────────────────────────────────
 
 class _LargeCategoryGrid extends StatelessWidget {
-  final List categories;
+  final List<CategoryModel> categories;
   final CartController cartCtrl;
 
   const _LargeCategoryGrid({required this.categories, required this.cartCtrl});
@@ -410,7 +412,7 @@ class _LargeCategoryGrid extends StatelessWidget {
 // ─────────────────────────────────────────────────
 
 class _LargeCategoryCard extends StatelessWidget {
-  final dynamic category;
+  final CategoryModel category;
   final CartController cartCtrl;
 
   const _LargeCategoryCard({required this.category, required this.cartCtrl});
@@ -423,7 +425,7 @@ class _LargeCategoryCard extends StatelessWidget {
           MaterialPageRoute(
             builder: (_) => ProductDetailView(
               categoryId: category.id,
-              categoryName: category.name,
+              categoryName: formatCategoryTitle(category.name),
               cartCtrl: cartCtrl,
             ),
           ),
@@ -451,18 +453,34 @@ class _LargeCategoryCard extends StatelessWidget {
                 color: AppColors.primarySurface,
                 borderRadius: BorderRadius.circular(18),
               ),
-              child: Center(
-                child: Text(
-                  category.icon.isNotEmpty ? category.icon : '☕',
-                  style: const TextStyle(fontSize: 32),
-                ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(18),
+                child: category.imageUrl.isNotEmpty
+                    ? Image.network(
+                        category.imageUrl,
+                        width: 72,
+                        height: 72,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, _, _) => Center(
+                          child: Text(
+                            category.icon.isNotEmpty ? category.icon : '☕',
+                            style: const TextStyle(fontSize: 32),
+                          ),
+                        ),
+                      )
+                    : Center(
+                        child: Text(
+                          category.icon.isNotEmpty ? category.icon : '☕',
+                          style: const TextStyle(fontSize: 32),
+                        ),
+                      ),
               ),
             ),
             const SizedBox(height: 14),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12),
               child: Text(
-                category.name,
+                formatCategoryTitle(category.name),
                 textAlign: TextAlign.center,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,

@@ -3,12 +3,16 @@ import 'package:http/http.dart' as http;
 import '../models/wallet_model.dart';
 import '../services/token_storage.dart';
 import '../utils/constants.dart';
+import '../services/http_log_interceptor.dart';
 
 /// Servicio de billetera — balance, historial y recarga.
 class WalletService {
+  final http.Client _client;
   final String baseUrl;
 
-  WalletService({String? baseUrl}) : baseUrl = baseUrl ?? AppConstants.apiBaseUrl;
+  WalletService({http.Client? client, String? baseUrl})
+      : _client = client ?? HttpLogInterceptor(inner: http.Client()),
+        baseUrl = baseUrl ?? AppConstants.apiBaseUrl;
 
   Future<Map<String, String>> _authHeaders() async {
     final token = await TokenStorage.getToken();
@@ -21,7 +25,7 @@ class WalletService {
   /// Obtiene saldo actual del usuario autenticado.
   Future<WalletBalance> getBalance() async {
     final headers = await _authHeaders();
-    final res = await http.get(
+    final res = await _client.get(
       Uri.parse('$baseUrl/wallet/balance'),
       headers: headers,
     );
@@ -34,12 +38,12 @@ class WalletService {
   /// Obtiene historial de transacciones.
   Future<List<RechargeTransaction>> getTransactions() async {
     final headers = await _authHeaders();
-    final res = await http.get(
+    final res = await _client.get(
       Uri.parse('$baseUrl/wallet/transactions'),
       headers: headers,
     );
     if (res.statusCode == 200) {
-      final list = jsonDecode(res.body) as List;
+      final list = jsonDecode(res.body) as List? ?? [];
       return list
           .map((e) => RechargeTransaction.fromJson(e as Map<String, dynamic>))
           .toList();
@@ -54,7 +58,7 @@ class WalletService {
     String? referenceCode,
   }) async {
     final headers = await _authHeaders();
-    final res = await http.post(
+    final res = await _client.post(
       Uri.parse('$baseUrl/wallet/recharge'),
       headers: headers,
       body: jsonEncode({
@@ -78,4 +82,3 @@ class WalletService {
     }
   }
 }
-

@@ -58,6 +58,8 @@ class OrderModel {
   final String? notes;
   final List<OrderItemModel> items;
   final DateTime createdAt;
+  final int? customerId;
+  final String? customerCode;
 
   const OrderModel({
     required this.id,
@@ -70,6 +72,8 @@ class OrderModel {
     this.notes,
     required this.items,
     required this.createdAt,
+    this.customerId,
+    this.customerCode,
   });
 
   factory OrderModel.fromJson(Map<String, dynamic> json) {
@@ -79,7 +83,7 @@ class OrderModel {
       orderNumber: json['orderNumber'] as String? ?? '',
       userEmail: json['userEmail'] as String? ?? '',
       status: OrderStatus.fromString(json['status'] as String? ?? 'PENDING'),
-      totalAmount: (json['totalAmount'] as num?)?.toDouble() ?? 0.0,
+      totalAmount: ((json['totalAmount'] ?? json['total']) as num?)?.toDouble() ?? 0.0,
       paymentMethod: json['paymentMethod'] as String? ?? '',
       deliveryLocation: json['deliveryLocation'] as String? ?? '',
       notes: json['notes'] as String?,
@@ -89,6 +93,8 @@ class OrderModel {
       createdAt: json['createdAt'] != null
           ? DateTime.tryParse(json['createdAt'].toString()) ?? DateTime.now()
           : DateTime.now(),
+      customerId: json['customerId'] as int?,
+      customerCode: json['customerCode'] as String?,
     );
   }
 }

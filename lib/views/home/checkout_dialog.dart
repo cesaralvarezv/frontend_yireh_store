@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import '../../controllers/cart_controller.dart';
+import '../../domain/port/out/cash_closure_repository_port.dart';
 import '../../domain/port/out/order_repository_port.dart';
 import '../../domain/port/out/wallet_repository_port.dart';
+import '../../infrastructure/adapter/out/api_cash_closure_repository.dart';
 import '../../infrastructure/adapter/out/api_order_repository.dart';
 import '../../infrastructure/adapter/out/api_wallet_repository.dart';
+import '../../models/cash_closure_status_model.dart';
 import '../../models/order_model.dart';
 import '../../theme/app_colors.dart';
 import 'my_orders_view.dart';
@@ -25,6 +28,7 @@ class CheckoutDialog extends StatefulWidget {
 class _CheckoutDialogState extends State<CheckoutDialog> {
   final OrderRepositoryPort _orderRepo = ApiOrderRepository();
   final WalletRepositoryPort _walletRepo = ApiWalletRepository();
+  final CashClosureRepositoryPort _cashClosureRepo = ApiCashClosureRepository();
   final _notesCtrl = TextEditingController();
 
   String _deliveryLocation = 'Piso 1';
@@ -32,6 +36,9 @@ class _CheckoutDialogState extends State<CheckoutDialog> {
   double _userBalance = 0.0;
   bool _isLoadingBalance = true;
   bool _isProcessing = false;
+
+  CashClosureStatusModel? _cashStatus;
+  bool _isLoadingCashStatus = true;
 
   final List<String> _locations = [
     'Piso 1',
@@ -45,6 +52,7 @@ class _CheckoutDialogState extends State<CheckoutDialog> {
   void initState() {
     super.initState();
     _loadBalance();
+    _loadCashStatus();
   }
 
   @override
@@ -67,6 +75,23 @@ class _CheckoutDialogState extends State<CheckoutDialog> {
     }
   }
 
+  Future<void> _loadCashStatus() async {
+    try {
+      final status = await _cashClosureRepo.getStatus();
+      if (!mounted) return;
+      setState(() {
+        _cashStatus = status;
+        _isLoadingCashStatus = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _cashStatus = null;
+        _isLoadingCashStatus = false;
+      });
+    }
+  }
+
   String _formatCurrency(double val) {
     return val.toStringAsFixed(0).replaceAllMapped(
       RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
@@ -76,7 +101,19 @@ class _CheckoutDialogState extends State<CheckoutDialog> {
 
   bool get _hasSufficientBalance => _userBalance >= widget.cartCtrl.total;
 
+  bool get _isCashClosed => _cashStatus != null && !_cashStatus!.open;
+
   Future<void> _confirmCheckout() async {
+    if (_isCashClosed) {
+      final message = _cashStatus?.message.isNotEmpty == true
+          ? _cashStatus!.message
+          : 'No hay un turno de caja abierto. El cajero debe aperturar caja antes de tomar pedidos.';
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(backgroundColor: AppColors.error, content: Text(message)),
+      );
+      return;
+    }
+
     if (_paymentMethod == 'WALLET' && !_hasSufficientBalance) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -104,13 +141,17 @@ class _CheckoutDialogState extends State<CheckoutDialog> {
         _showSuccessDialog(order);
       }
     } catch (e) {
+      final message = e.toString().replaceAll('Exception: ', '');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             backgroundColor: AppColors.error,
-            content: Text('Error al procesar pedido: ${e.toString().replaceAll('Exception: ', '')}'),
+            content: Text('Error al procesar pedido: $message'),
           ),
         );
+      }
+      if (message.toLowerCase().contains('caja')) {
+        _loadCashStatus();
       }
     } finally {
       if (mounted) setState(() => _isProcessing = false);
@@ -224,6 +265,15 @@ class _CheckoutDialogState extends State<CheckoutDialog> {
               ],
             ),
             const Divider(color: AppColors.divider),
+            const SizedBox(height: 10),
+
+            _CashStatusBanner(
+              loading: _isLoadingCashStatus,
+              open: _cashStatus?.open == true,
+              cashierEmail: _cashStatus?.cashierEmail,
+              message: _cashStatus?.message ?? '',
+              onRetry: _loadCashStatus,
+            ),
             const SizedBox(height: 10),
 
             // Resumen de productos
@@ -377,7 +427,7 @@ class _CheckoutDialogState extends State<CheckoutDialog> {
 
             // Botón Confirmar
             ElevatedButton(
-              onPressed: _isProcessing ? null : _confirmCheckout,
+              onPressed: (_isProcessing || _isCashClosed) ? null : _confirmCheckout,
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
@@ -397,6 +447,133 @@ class _CheckoutDialogState extends State<CheckoutDialog> {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _CashStatusBanner extends StatelessWidget {
+  final bool loading;
+  final bool open;
+  final String? cashierEmail;
+  final String message;
+  final VoidCallback? onRetry;
+
+  const _CashStatusBanner({
+    required this.loading,
+    required this.open,
+    required this.message,
+    this.cashierEmail,
+    this.onRetry,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (loading) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        decoration: BoxDecoration(
+          color: AppColors.fieldFill,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: const Row(
+          children: [
+            SizedBox(
+              width: 14,
+              height: 14,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            ),
+            SizedBox(width: 8),
+            Text(
+              'Verificando estado de caja...',
+              style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (open) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+        decoration: BoxDecoration(
+          color: AppColors.successSurface,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: AppColors.success.withValues(alpha: 0.25)),
+        ),
+        child: Row(
+          children: [
+            const Icon(Icons.lock_open_rounded, color: AppColors.success, size: 18),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                cashierEmail != null && cashierEmail!.isNotEmpty
+                    ? 'Caja abierta por $cashierEmail. Ya se pueden tomar pedidos.'
+                    : 'Caja abierta. Ya se pueden tomar pedidos.',
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: AppColors.success,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    final isKnownClosed = message.isNotEmpty;
+    final color = isKnownClosed ? AppColors.error : AppColors.textSecondary;
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(
+            isKnownClosed ? Icons.lock_rounded : Icons.info_outline_rounded,
+            color: color,
+            size: 18,
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  isKnownClosed ? 'Caja cerrada' : 'No se pudo verificar la caja',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: color,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  isKnownClosed
+                      ? message
+                      : 'El servidor validará el estado de caja al confirmar el pago.',
+                  style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                ),
+              ],
+            ),
+          ),
+          if (onRetry != null)
+            TextButton(
+              onPressed: onRetry,
+              style: TextButton.styleFrom(
+                foregroundColor: AppColors.primary,
+                padding: const EdgeInsets.symmetric(horizontal: 6),
+                minimumSize: const Size(0, 32),
+              ),
+              child: const Text('Reintentar', style: TextStyle(fontSize: 11)),
+            ),
+        ],
       ),
     );
   }

@@ -6,6 +6,8 @@ class UserModel {
   final String? token;
   final Set<String> roles;
   final double balance;
+  final int? customerId;
+  final String? customerCode;
 
   const UserModel({
     this.id,
@@ -15,9 +17,12 @@ class UserModel {
     this.token,
     this.roles = const {'USER'},
     this.balance = 0.0,
+    this.customerId,
+    this.customerCode,
   });
 
   bool get isAdmin => roles.contains('ADMIN');
+  bool get isCashier => roles.contains('CASHIER') || isAdmin;
   bool get isUser => roles.contains('USER');
 
   UserModel copyWith({
@@ -28,6 +33,8 @@ class UserModel {
     String? token,
     Set<String>? roles,
     double? balance,
+    int? customerId,
+    String? customerCode,
   }) {
     return UserModel(
       id: id ?? this.id,
@@ -37,6 +44,8 @@ class UserModel {
       token: token ?? this.token,
       roles: roles ?? this.roles,
       balance: balance ?? this.balance,
+      customerId: customerId ?? this.customerId,
+      customerCode: customerCode ?? this.customerCode,
     );
   }
 
@@ -53,6 +62,8 @@ class UserModel {
       token: json['token'] as String?,
       roles: roles,
       balance: (json['balance'] as num?)?.toDouble() ?? 0.0,
+      customerId: json['customerId'] as int?,
+      customerCode: json['customerCode'] as String?,
     );
   }
 
@@ -64,6 +75,8 @@ class UserModel {
         if (token != null) 'token': token,
         'roles': roles.toList(),
         'balance': balance,
+        if (customerId != null) 'customerId': customerId,
+        if (customerCode != null) 'customerCode': customerCode,
       };
 
   @override

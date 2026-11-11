@@ -5,6 +5,7 @@ class CategoryModel {
   final String name;
   final String description;
   final String icon;
+  final String imageUrl;
   final String location;
   final bool active;
   final int order;
@@ -16,6 +17,7 @@ class CategoryModel {
     required this.name,
     this.description = '',
     this.icon = '',
+    this.imageUrl = '',
     this.location = '',
     this.active = true,
     this.order = 0,
@@ -41,6 +43,7 @@ class CategoryModel {
       name: json['name'] as String? ?? '',
       description: json['description'] as String? ?? '',
       icon: json['icon'] as String? ?? '',
+      imageUrl: json['imageUrl'] as String? ?? '',
       location: json['location'] as String? ?? '',
       active: json['active'] as bool? ?? true,
       order: (json['order'] as num?)?.toInt() ?? 0,
@@ -54,6 +57,7 @@ class CategoryModel {
         'name': name,
         'description': description,
         'icon': icon,
+        'imageUrl': imageUrl,
         'location': location,
         'active': active,
         'order': order,
@@ -66,6 +70,7 @@ class CategoryModel {
     String? name,
     String? description,
     String? icon,
+    String? imageUrl,
     String? location,
     bool? active,
     int? order,
@@ -77,6 +82,7 @@ class CategoryModel {
       name: name ?? this.name,
       description: description ?? this.description,
       icon: icon ?? this.icon,
+      imageUrl: imageUrl ?? this.imageUrl,
       location: location ?? this.location,
       active: active ?? this.active,
       order: order ?? this.order,
@@ -88,6 +94,11 @@ class CategoryModel {
   String get displayCreatedAt {
     if (createdAt == null) return '';
     return DateFormat('dd/MM/yyyy HH:mm').format(createdAt!);
+  }
+
+  String get displayCreatedDate {
+    if (createdAt == null) return '';
+    return DateFormat('dd/MM/yyyy').format(createdAt!);
   }
 
   String get displayUpdatedAt {
@@ -104,5 +115,6 @@ class CategoryModel {
   int get hashCode => id.hashCode;
 
   @override
-  String toString() => 'CategoryModel(id: $id, name: $name, active: $active, order: $order)';
+  String toString() =>
+      'CategoryModel(id: $id, name: $name, location: $location, active: $active, order: $order)';
 }

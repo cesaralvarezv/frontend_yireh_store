@@ -13,7 +13,7 @@ void main() {
     expect(find.text('Cargando...'), findsOneWidget);
     // Espera animacion + delay de SplashView (2.2s)
     await tester.pump(const Duration(milliseconds: 2200));
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 100));
     expect(find.text('Bienvenido'), findsOneWidget);
     expect(find.text('Correo Electrónico'), findsOneWidget);
     expect(find.text('Ingresar'), findsWidgets);
@@ -22,7 +22,7 @@ void main() {
   testWidgets('Navigate to register', (WidgetTester tester) async {
     await tester.pumpWidget(const YirehApp());
     await tester.pump(const Duration(milliseconds: 2200));
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 100));
     await tester.tap(find.text('Registrarse').first);
     await tester.pumpAndSettle();
     expect(find.text('Nombre Completo'), findsOneWidget);

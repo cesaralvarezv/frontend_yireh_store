@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import '../../controllers/auth_controller.dart';
 import '../../repositories/auth_repository.dart';
 import '../../services/auth_service.dart';
+import '../../services/credential_storage.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_text_styles.dart';
 import '../../utils/responsive.dart';
@@ -32,6 +35,8 @@ class _LoginViewState extends State<LoginView> {
   final _emailFocus = FocusNode();
   final _passwordFocus = FocusNode();
 
+  bool _rememberCredentials = false;
+
   @override
   void initState() {
     super.initState();
@@ -40,6 +45,76 @@ class _LoginViewState extends State<LoginView> {
       repository: AuthRepositoryImpl(service: ApiAuthService()),
     );
     _controller.addListener(_onControllerChanged);
+    _loadSavedCredentials();
+  }
+
+  Future<void> _loadSavedCredentials() async {
+    try {
+      final saved = await CredentialStorage.load();
+      if (!mounted || saved == null) return;
+      setState(() {
+        _emailController.text = saved.email;
+        _passwordController.text = saved.password;
+        _rememberCredentials = true;
+      });
+    } catch (_) {
+      // Si falla la lectura, el login sigue funcionando sin credenciales guardadas.
+    }
+  }
+
+  void _onRememberChanged(bool? value) {
+    final remember = value ?? false;
+    setState(() => _rememberCredentials = remember);
+    if (!remember) {
+      unawaited(CredentialStorage.clear());
+    }
+  }
+
+  Widget _buildRememberMe() {
+    return Row(
+      children: [
+        SizedBox(
+          width: 24,
+          height: 24,
+          child: Checkbox(
+            value: _rememberCredentials,
+            onChanged: _onRememberChanged,
+            activeColor: AppColors.primary,
+            checkColor: Colors.white,
+            side: const BorderSide(color: AppColors.fieldBorder, width: 1.2),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(5),
+            ),
+            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            visualDensity: VisualDensity.compact,
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () => _onRememberChanged(!_rememberCredentials),
+            child: const Text(
+              'Recordar usuario y contraseña',
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ),
+        ),
+        const Tooltip(
+          message:
+              'La contraseña se guarda en este dispositivo. Evita usarlo en equipos compartidos.',
+          child: Icon(
+            Icons.info_outline_rounded,
+            size: 16,
+            color: AppColors.textHint,
+          ),
+        ),
+      ],
+    );
   }
 
   void _onControllerChanged() {
@@ -61,10 +136,17 @@ class _LoginViewState extends State<LoginView> {
     FocusScope.of(context).unfocus();
     if (!_formKey.currentState!.validate()) return;
 
-    final success = await _controller.login(
-      _emailController.text.trim(),
-      _passwordController.text,
-    );
+    final email = _emailController.text.trim();
+    final password = _passwordController.text;
+    final success = await _controller.login(email, password);
+
+    if (success) {
+      if (_rememberCredentials) {
+        await CredentialStorage.save(email: email, password: password);
+      } else {
+        await CredentialStorage.clear();
+      }
+    }
 
     if (!mounted) return;
     if (success) {
@@ -169,7 +251,9 @@ class _LoginViewState extends State<LoginView> {
                             textInputAction: TextInputAction.done,
                             onFieldSubmitted: (_) => _handleLogin(),
                           ),
-                          SizedBox(height: Responsive.sectionSpacing(context, 24)),
+                          const SizedBox(height: 10),
+                          _buildRememberMe(),
+                          SizedBox(height: Responsive.sectionSpacing(context, 18)),
                           PrimaryButton(
                             label: 'Ingresar',
                             isLoading: _controller.isLoading,

@@ -133,7 +133,7 @@ class _MyOrdersViewState extends State<MyOrdersView> {
                       child: ListView.separated(
                         padding: const EdgeInsets.all(16),
                         itemCount: _orders.length,
-                        separatorBuilder: (_, __) => const SizedBox(height: 14),
+                        separatorBuilder: (_, _) => const SizedBox(height: 14),
                         itemBuilder: (ctx, i) {
                           final order = _orders[i];
                           final statusColor = _getStatusColor(order.status);
